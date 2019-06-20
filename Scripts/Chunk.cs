@@ -1,0 +1,82 @@
+﻿using UnityEngine;
+
+public class Chunk : MonoBehaviour
+{
+
+    [SerializeField]
+    public Point[] points;
+    public Vector3Int chunkIndex;
+
+    public MarchingCubes _marchingCubes;
+    public DensityGenerator _densityGenerator;
+
+    public void Initialize(World world, Vector3Int chunkIndex)
+    {
+        transform.SetParent(world.transform, false);
+        transform.localScale = Vector3.one;
+        gameObject.hideFlags = HideFlags.NotEditable;
+        name = chunkIndex.ToString();
+        gameObject.layer = LayerMask.NameToLayer("Chunk");
+
+        this.chunkIndex = chunkIndex;
+        points = new Point[(int)Mathf.Pow(world.chunkSize + 1, 3)];
+        UpdateAfterReload(world);
+
+        ResetPoints(world);
+    }
+
+    public void ResetPoints(World world)
+    {
+        UpdateAfterReload(world);
+
+        for (int x = 0; x < world.chunkSize + 1; x++)
+        {
+            for (int y = 0; y < world.chunkSize + 1; y++)
+            {
+                for (int z = 0; z < world.chunkSize + 1; z++)
+                {
+                    points[x + (world.chunkSize + 1) * (y + z * (world.chunkSize + 1))] = new Point(new Vector3Int(x, y, z), _densityGenerator.CalculateDensity(world, world.transform.lossyScale.x * x + transform.position.x, world.transform.lossyScale.x * y + transform.position.y, world.transform.lossyScale.x * z + transform.position.z));
+                }
+            }
+        }
+    }
+
+    public void UpdateAfterReload(World world)
+    {
+        _densityGenerator = world.densityGenerator;
+        _marchingCubes = new MarchingCubes(world, points, world.isoLevel, world.seed);
+    }
+
+    public void Generate(World world)
+    {
+        if (_marchingCubes == null)
+        {
+            UpdateAfterReload(transform.parent.GetComponent<World>());
+        }
+
+        Mesh mesh = _marchingCubes.CreateMeshData(world, points);
+
+        GetComponent<MeshFilter>().sharedMesh = mesh;
+        GetComponent<MeshCollider>().sharedMesh = mesh;
+    }
+
+    public Point GetPoint(World world, Vector3Int pos)
+    {
+        return GetPoint(world, pos.x, pos.y, pos.z);
+    }
+
+    public Point GetPoint(World world, int x, int y, int z)
+    {
+        return points[x + (world.chunkSize + 1) * (y + z * (world.chunkSize + 1))];
+    }
+
+    public void SetDensity(World world, float density, int x, int y, int z)
+    {
+        points[x + (world.chunkSize + 1) * (y + z * (world.chunkSize + 1))].density = density;
+    }
+
+    public void SetDensity(World world, float density, Vector3 position)
+    {
+        SetDensity(world, density, Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.y), Mathf.RoundToInt(position.z));
+    }
+}
