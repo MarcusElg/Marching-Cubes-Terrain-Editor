@@ -50,9 +50,13 @@ public class WorldEditor : Editor
         GUILayout.EndHorizontal();
 
         GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Options"))
+        if (GUILayout.Button("Paint"))
         {
             serializedObject.FindProperty("terrainMode").enumValueIndex = 3;
+        }
+        else if (GUILayout.Button("Options"))
+        {
+            serializedObject.FindProperty("terrainMode").enumValueIndex = 4;
         }
 
         GUILayout.EndHorizontal();
@@ -70,7 +74,7 @@ public class WorldEditor : Editor
         {
             InspectorSet();
         }
-        else if (serializedObject.FindProperty("terrainMode").enumValueIndex == 3)
+        else if (serializedObject.FindProperty("terrainMode").enumValueIndex == 4)
         {
             InspectorOptions();
         }

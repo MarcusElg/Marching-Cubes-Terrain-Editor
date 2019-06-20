@@ -22,7 +22,7 @@ public class World : MonoBehaviour
     public float noiseStretch = 1;
 
     public DensityGenerator densityGenerator;
-    public enum TerrainMode { Modify, Set, Smooth, Options };
+    public enum TerrainMode { Modify, Set, Smooth, Paint, Options };
     public TerrainMode terrainMode = TerrainMode.Set;
 
     public Vector3Int chunkStartIndexToAdd;
