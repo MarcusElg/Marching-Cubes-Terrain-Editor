@@ -205,57 +205,61 @@ public class WorldEditor : Editor
             world.transform.hasChanged = false;
         }
 
-        if (Physics.Raycast(ray, out raycastHit))
+        // Brushes
+        if (Event.current.shift == false)
         {
-            if (raycastHit.transform.GetComponent<Chunk>() != null)
+            if (Physics.Raycast(ray, out raycastHit))
             {
-                World world = raycastHit.transform.parent.GetComponent<World>();
-
-                if (world.terrainMode == World.TerrainMode.Modify)
+                if (raycastHit.transform.GetComponent<Chunk>() != null)
                 {
-                    Handles.color = Color.white;
-                    Handles.DrawWireDisc(raycastHit.point, Vector3.up, world.range);
+                    World world = raycastHit.transform.parent.GetComponent<World>();
 
-                    if (Event.current.type == EventType.MouseDown)
+                    if (world.terrainMode == World.TerrainMode.Modify)
                     {
-                        bool raise = true;
+                        Handles.color = Color.white;
+                        Handles.DrawWireDisc(raycastHit.point, Vector3.up, world.range);
 
-                        if (Event.current.button == 1)
+                        if (Event.current.type == EventType.MouseDown)
                         {
-                            raise = false;
-                        }
-                        else if (Event.current.button == 2)
-                        {
-                            return;
-                        }
+                            bool raise = true;
 
-                        TerrainEditor.ModifyTerrain(world, raycastHit.point, raise);
+                            if (Event.current.button == 1)
+                            {
+                                raise = false;
+                            }
+                            else if (Event.current.button == 2)
+                            {
+                                return;
+                            }
+
+                            TerrainEditor.ModifyTerrain(world, raycastHit.point, raise);
+                        }
+                    }
+                    else if (world.terrainMode == World.TerrainMode.Set)
+                    {
+                        Handles.color = Color.white;
+                        Handles.DrawWireDisc(raycastHit.point, Vector3.up, world.range);
+
+                        if (Event.current.type == EventType.MouseDown)
+                        {
+                            if (Event.current.button == 2)
+                            {
+                                world.targetHeight = Mathf.RoundToInt(raycastHit.point.y - raycastHit.transform.position.y);
+                                return;
+                            }
+
+                            if (Event.current.button == 1)
+                            {
+                                return;
+                            }
+
+                            TerrainEditor.SetTerrain(world, raycastHit.point);
+                        }
                     }
                 }
-                else if (world.terrainMode == World.TerrainMode.Set)
-                {
-                    Handles.color = Color.white;
-                    Handles.DrawWireDisc(raycastHit.point, Vector3.up, world.range);
 
-                    if (Event.current.type == EventType.MouseDown)
-                    {
-                        if (Event.current.button == 2)
-                        {
-                            world.targetHeight = Mathf.RoundToInt(raycastHit.point.y - raycastHit.transform.position.y);
-                            return;
-                        }
-
-                        if (Event.current.button == 1)
-                        {
-                            return;
-                        }
-
-                        TerrainEditor.SetTerrain(world, raycastHit.point);
-                    }
-                }
+                SceneView.currentDrawingSceneView.Repaint();
             }
-
-            SceneView.currentDrawingSceneView.Repaint();
         }
     }
 
