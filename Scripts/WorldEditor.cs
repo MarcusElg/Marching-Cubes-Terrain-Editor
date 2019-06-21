@@ -74,6 +74,10 @@ public class WorldEditor : Editor
         {
             InspectorSet();
         }
+        else if (serializedObject.FindProperty("terrainMode").enumValueIndex == 3)
+        {
+            InspectorPaint();
+        }
         else if (serializedObject.FindProperty("terrainMode").enumValueIndex == 4)
         {
             InspectorOptions();
@@ -118,6 +122,31 @@ public class WorldEditor : Editor
         serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 0.1f, serializedObject.FindProperty("chunkSize").intValue * 0.75f * world.transform.lossyScale.x);
         serializedObject.FindProperty("forceOverDistance").animationCurveValue = EditorGUILayout.CurveField("Force Over Distance", serializedObject.FindProperty("forceOverDistance").animationCurveValue);
         serializedObject.FindProperty("targetHeight").intValue = Mathf.Clamp(EditorGUILayout.IntField("Target Height", serializedObject.FindProperty("targetHeight").intValue), 0, serializedObject.FindProperty("chunkSize").intValue);
+
+        if (EditorGUI.EndChangeCheck() == true)
+        {
+            serializedObject.ApplyModifiedPropertiesWithoutUndo();
+        }
+    }
+
+    private void InspectorPaint()
+    {
+        EditorGUI.BeginChangeCheck();
+        serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 0.1f, serializedObject.FindProperty("chunkSize").intValue * 0.75f * world.transform.lossyScale.x);
+        serializedObject.FindProperty("colour").colorValue = EditorGUILayout.ColorField("Colour", serializedObject.FindProperty("colour").colorValue);
+
+        if (GUILayout.Button("Paint All"))
+        {
+            for (int i = 0; i < world.transform.childCount; i++)
+            {
+                for (int j = 0; j < world.transform.GetChild(i).GetComponent<Chunk>().points.Length; j++)
+                {
+                    world.transform.GetChild(i).GetComponent<Chunk>().points[j].colour = serializedObject.FindProperty("colour").colorValue;
+                }
+            }
+
+            world.Generate();
+        }
 
         if (EditorGUI.EndChangeCheck() == true)
         {
@@ -218,11 +247,14 @@ public class WorldEditor : Editor
                 {
                     World world = raycastHit.transform.parent.GetComponent<World>();
 
-                    if (world.terrainMode == World.TerrainMode.Modify)
+                    if (world.terrainMode != World.TerrainMode.Options)
                     {
                         Handles.color = Color.white;
                         Handles.DrawWireDisc(raycastHit.point, Vector3.up, world.range);
+                    }
 
+                    if (world.terrainMode == World.TerrainMode.Modify)
+                    {
                         if (Event.current.type == EventType.MouseDown)
                         {
                             bool raise = true;
@@ -241,9 +273,6 @@ public class WorldEditor : Editor
                     }
                     else if (world.terrainMode == World.TerrainMode.Set)
                     {
-                        Handles.color = Color.white;
-                        Handles.DrawWireDisc(raycastHit.point, Vector3.up, world.range);
-
                         if (Event.current.type == EventType.MouseDown)
                         {
                             if (Event.current.button == 2)
@@ -258,6 +287,23 @@ public class WorldEditor : Editor
                             }
 
                             TerrainEditor.SetTerrain(world, raycastHit.point);
+                        }
+                    }
+                    else if (world.terrainMode == World.TerrainMode.Paint)
+                    {
+                        if (Event.current.type == EventType.MouseDown)
+                        {
+                            if (Event.current.button == 2)
+                            {
+                                world.colour = raycastHit.transform.GetComponent<MeshFilter>().sharedMesh.colors[raycastHit.transform.GetComponent<MeshFilter>().sharedMesh.triangles[raycastHit.triangleIndex * 3]];
+                            }
+
+                            if (Event.current.button == 1)
+                            {
+                                return;
+                            }
+
+                            TerrainEditor.PaintTerrain(world, raycastHit.point);
                         }
                     }
                 }

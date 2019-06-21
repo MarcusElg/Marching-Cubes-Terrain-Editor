@@ -3,11 +3,16 @@ using UnityEngine;
 
 public class World : MonoBehaviour
 {
+    /// Modify
     public float range = 2f;
     public float force = 2f;
     public AnimationCurve forceOverDistance = AnimationCurve.Constant(0, 1, 1);
 
+    // Set
     public int targetHeight = 10;
+
+    // Paint
+    public Color colour;
 
     public int chunkSize = 8;
     public float groundHeight = 10;
@@ -100,8 +105,7 @@ public class World : MonoBehaviour
         }
         else
         {
-            Point p = new Point(new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue), 0);
-            return p;
+            return new Point(new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue), 0, Random.ColorHSV());
         }
     }
 

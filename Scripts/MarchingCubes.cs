@@ -1,9 +1,11 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class MarchingCubes
 {
     private Vector3[] _vertices;
     private int[] _triangles;
+    private List<Color> _colours;
     private float _isoLevel;
 
     private int _vertexIndex;
@@ -51,11 +53,12 @@ public class MarchingCubes
         return p;
     }
 
-    private void March(Point[] points, int cubeIndex)
+    private List<int> March(Point[] points, int cubeIndex)
     {
         int edgeIndex = LookupTables.EdgeTable[cubeIndex];
 
-        _vertexList = GenerateVertexList(points, edgeIndex);
+        List<int> pointIndexes = new List<int>();
+        _vertexList = GenerateVertexList(points, edgeIndex, ref pointIndexes);
 
         int[] row = LookupTables.TriangleTable[cubeIndex];
 
@@ -73,9 +76,11 @@ public class MarchingCubes
             _triangles[_vertexIndex] = _vertexIndex;
             _vertexIndex++;
         }
+
+        return pointIndexes;
     }
 
-    private Vector3[] GenerateVertexList(Point[] points, int edgeIndex)
+    private Vector3[] GenerateVertexList(Point[] points, int edgeIndex, ref List<int> pointIndexes)
     {
         for (int i = 0; i < 12; i++)
         {
@@ -87,6 +92,9 @@ public class MarchingCubes
 
                 Point point1 = points[edge1];
                 Point point2 = points[edge2];
+
+                pointIndexes.Add(edge1);
+                pointIndexes.Add(edge2);
 
                 _vertexList[i] = VertexInterpolate(point1.localPosition, point2.localPosition, point1.density, point2.density);
             }
@@ -118,6 +126,7 @@ public class MarchingCubes
 
         _vertices = new Vector3[vertexCount];
         _triangles = new int[vertexCount];
+        _colours = new List<Color>();
 
         for (int x = 0; x < world.chunkSize; x++)
         {
@@ -128,7 +137,14 @@ public class MarchingCubes
                     int cubeIndex = _cubeIndexes[x, y, z];
                     if (cubeIndex == 0 || cubeIndex == 255) continue;
 
-                    March(GetPoints(world, x, y, z, points), cubeIndex);
+                    Point[] points2 = GetPoints(world, x, y, z, points);
+                    List<int> pointIndexes = March(points2, cubeIndex);
+                    for (int i = 0; i < pointIndexes.Count - 3; i+=4)
+                    {
+                        _colours.Add(points2[pointIndexes[i]].colour);
+                        _colours.Add(points2[pointIndexes[i]].colour);
+                        _colours.Add(points2[pointIndexes[i]].colour);
+                    }
                 }
             }
         }
@@ -136,9 +152,9 @@ public class MarchingCubes
         _vertexIndex = 0;
 
         _mesh.Clear();
-
         _mesh.vertices = _vertices;
         _mesh.SetTriangles(_triangles, 0);
+        _mesh.SetColors(_colours);
         _mesh.RecalculateNormals();
 
         return _mesh;

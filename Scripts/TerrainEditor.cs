@@ -179,5 +179,70 @@ public class TerrainEditor : MonoBehaviour
         }
     }
 
+    public static void PaintTerrain(World world, Vector3 point)
+    {
+        int hitX = point.x.Round();
+        int hitY = point.y.Round();
+        int hitZ = point.z.Round();
+        Vector3 hitPos = new Vector3(hitX, hitY, hitZ);
+        int intRange = world.range.Ceil();
+
+        // Dertermine what chunks to update
+        Chunk centerChunk = world.GetChunk(point + new Vector3(0, 10, 0));
+        Chunk topLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 10, world.range + 0.1f));
+        Chunk topRightChunk = world.GetChunk(point + new Vector3(world.range + 0.1f, 10, world.range + 0.1f));
+        Chunk bottomLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 10, -world.range - 0.1f));
+        Chunk bottomRightChunk = world.GetChunk(point + new Vector3(world.range + 0.1f, 10, -world.range - 0.1f));
+
+        for (int x = -intRange; x <= intRange; x++)
+        {
+            for (int y = -intRange; y <= intRange; y++)
+            {
+                for (int z = -intRange; z <= intRange; z++)
+                {
+                    int offsetedX = hitX - x;
+                    int offsetedY = hitY - y;
+                    int offsetedZ = hitZ - z;
+
+                    float distance = Utils.Distance(offsetedX, offsetedY, offsetedZ, point);
+                    if (!(distance <= world.range))
+                    {
+                        continue;
+                    }
+
+                    Chunk chunk2 = world.GetChunk(offsetedX, offsetedY, offsetedZ);
+
+                    if (chunk2 != null)
+                    {
+                        chunk2.SetColor(world, world.colour, new Vector3(offsetedX, offsetedY, offsetedZ));
+                    }
+                }
+            }
+        }
+
+        // Update chunks
+        centerChunk.Generate(world);
+
+        if (topLeftChunk != null)
+        {
+            topLeftChunk.Generate(world);
+        }
+
+        if (topRightChunk != null)
+        {
+            topRightChunk.Generate(world);
+        }
+
+        if (bottomLeftChunk != null)
+        {
+            bottomLeftChunk.Generate(world);
+        }
+
+        if (bottomRightChunk != null)
+        {
+            bottomRightChunk.Generate(world);
+        }
+    }
+
 }
 

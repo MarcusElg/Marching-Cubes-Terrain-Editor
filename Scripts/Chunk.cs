@@ -21,7 +21,6 @@ public class Chunk : MonoBehaviour
 
         this.chunkIndex = chunkIndex;
         points = new Point[(int)Mathf.Pow(world.chunkSize + 1, 3)];
-        UpdateAfterReload(world);
 
         ResetPoints(world);
     }
@@ -36,7 +35,7 @@ public class Chunk : MonoBehaviour
             {
                 for (int z = 0; z < world.chunkSize + 1; z++)
                 {
-                    points[x + (world.chunkSize + 1) * (y + z * (world.chunkSize + 1))] = new Point(new Vector3Int(x, y, z), _densityGenerator.CalculateDensity(world, world.transform.lossyScale.x * x + transform.position.x, world.transform.lossyScale.x * y + transform.position.y, world.transform.lossyScale.x * z + transform.position.z));
+                    points[x + (world.chunkSize + 1) * (y + z * (world.chunkSize + 1))] = new Point(new Vector3Int(x, y, z), _densityGenerator.CalculateDensity(world, world.transform.lossyScale.x * x + transform.position.x, world.transform.lossyScale.x * y + transform.position.y, world.transform.lossyScale.x * z + transform.position.z), Random.ColorHSV());
                 }
             }
         }
@@ -73,11 +72,22 @@ public class Chunk : MonoBehaviour
 
     public void SetDensity(World world, float density, int x, int y, int z)
     {
+        x = Mathf.Clamp(x, 0, world.chunkSize);
+        y = Mathf.Clamp(y, 0, world.chunkSize);
+        z = Mathf.Clamp(z, 0, world.chunkSize);
         points[x + (world.chunkSize + 1) * (y + z * (world.chunkSize + 1))].density = density;
     }
 
     public void SetDensity(World world, float density, Vector3 position)
     {
-        SetDensity(world, density, Mathf.Clamp(Mathf.RoundToInt(position.x), 0, world.chunkSize + 1), Mathf.Clamp(Mathf.RoundToInt(position.y), 0, world.chunkSize + 1), Mathf.Clamp(Mathf.RoundToInt(position.z), 0, world.chunkSize + 1));
+        SetDensity(world, density, Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.y), Mathf.RoundToInt(position.z));
+    }
+
+    public void SetColor(World world, Color colour, Vector3 position)
+    {
+        int x = Mathf.Clamp(Mathf.RoundToInt(position.x), 0, world.chunkSize);
+        int y = Mathf.Clamp(Mathf.RoundToInt(position.y), 0, world.chunkSize);
+        int z = Mathf.Clamp(Mathf.RoundToInt(position.z), 0, world.chunkSize);
+        points[x + (world.chunkSize + 1) * (y + z * (world.chunkSize + 1))].colour = colour;
     }
 }
