@@ -210,11 +210,11 @@ public class TerrainEditor : MonoBehaviour
                         continue;
                     }
 
-                    Chunk chunk2 = world.GetChunk(offsetedX, offsetedY, offsetedZ);
+                    Chunk chunk2 = world.GetChunk(offsetedX, offsetedY + 1, offsetedZ);
 
                     if (chunk2 != null)
                     {
-                        chunk2.SetColor(world, world.colour, new Vector3(offsetedX, offsetedY, offsetedZ));
+                        chunk2.SetColor(world, world.colour, (new Vector3(offsetedX, offsetedY, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x);
                     }
                 }
             }

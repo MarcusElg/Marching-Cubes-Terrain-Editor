@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Triplanar Shading
+  m_Name: Marching Cubes Terrain
   m_Shader: {fileID: 4800000, guid: db8c18db5cb480d4c8523e1b745f5af5, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
@@ -41,6 +41,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - Texture2D_35130819:
         m_Texture: {fileID: 2800000, guid: 2fdf9aa38a68a274cbfa7b62d7a8841b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _XTexture:
