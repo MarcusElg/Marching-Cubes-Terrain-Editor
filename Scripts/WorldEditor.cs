@@ -10,11 +10,17 @@ public class WorldEditor : Editor
 
     World world;
     Tool lastTool;
+    bool leftButtonDown = false;
+    bool middleButtonDown = false;
+    bool rightButtonDown = false;
 
     void OnEnable()
     {
         lastTool = Tools.current;
         Tools.current = Tool.None;
+        leftButtonDown = false;
+        middleButtonDown = false;
+        rightButtonDown = false;
         world = (World)target;
 
         world.densityGenerator = new DensityGenerator(world.seed);
@@ -245,6 +251,37 @@ public class WorldEditor : Editor
             world.transform.hasChanged = false;
         }
 
+        if (Event.current.type == EventType.MouseDown)
+        {
+            if (Event.current.button == 0)
+            {
+                leftButtonDown = true;
+            }
+            else if (Event.current.button == 1)
+            {
+                rightButtonDown = true;
+            }
+            else if (Event.current.button == 2)
+            {
+                middleButtonDown = true;
+            }
+        }
+        else if (Event.current.type == EventType.MouseUp)
+        {
+            if (Event.current.button == 0)
+            {
+                leftButtonDown = false;
+            }
+            else if (Event.current.button == 1)
+            {
+                rightButtonDown = false;
+            }
+            else if (Event.current.button == 2)
+            {
+                middleButtonDown = false;
+            }
+        }
+
         // Brushes
         if (Event.current.shift == false)
         {
@@ -262,17 +299,13 @@ public class WorldEditor : Editor
 
                     if (world.terrainMode == World.TerrainMode.Modify)
                     {
-                        if (Event.current.type == EventType.MouseDown)
+                        if (leftButtonDown == true || rightButtonDown == true)
                         {
                             bool raise = true;
 
-                            if (Event.current.button == 1)
+                            if (rightButtonDown == true)
                             {
                                 raise = false;
-                            }
-                            else if (Event.current.button == 2)
-                            {
-                                return;
                             }
 
                             TerrainEditor.ModifyTerrain(world, raycastHit.point, raise);
@@ -280,37 +313,31 @@ public class WorldEditor : Editor
                     }
                     else if (world.terrainMode == World.TerrainMode.Set)
                     {
-                        if (Event.current.type == EventType.MouseDown)
+                        if (leftButtonDown == true)
                         {
-                            if (Event.current.button == 2)
-                            {
-                                world.targetHeight = Mathf.RoundToInt(raycastHit.point.y - raycastHit.transform.position.y);
-                                return;
-                            }
-
-                            if (Event.current.button == 1)
-                            {
-                                return;
-                            }
-
                             TerrainEditor.SetTerrain(world, raycastHit.point);
+                        }
+                        else if (middleButtonDown == true)
+                        {
+                            world.targetHeight = Mathf.RoundToInt(raycastHit.point.y - raycastHit.transform.position.y);
                         }
                     }
                     else if (world.terrainMode == World.TerrainMode.Paint)
                     {
-                        if (Event.current.type == EventType.MouseDown)
+                        if (leftButtonDown == true)
                         {
-                            if (Event.current.button == 2)
+                            TerrainEditor.PaintTerrain(world, raycastHit.point);
+                        }
+                        else if (middleButtonDown == true)
+                        {
+                            if (Event.current.control == true)
+                            {
+                                world.colourMask = raycastHit.transform.GetComponent<MeshFilter>().sharedMesh.colors[raycastHit.transform.GetComponent<MeshFilter>().sharedMesh.triangles[raycastHit.triangleIndex * 3]];
+                            }
+                            else
                             {
                                 world.colour = raycastHit.transform.GetComponent<MeshFilter>().sharedMesh.colors[raycastHit.transform.GetComponent<MeshFilter>().sharedMesh.triangles[raycastHit.triangleIndex * 3]];
                             }
-
-                            if (Event.current.button == 1)
-                            {
-                                return;
-                            }
-
-                            TerrainEditor.PaintTerrain(world, raycastHit.point);
                         }
                     }
                 }
