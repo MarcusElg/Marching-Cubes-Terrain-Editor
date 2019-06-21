@@ -4,6 +4,7 @@ public class Chunk : MonoBehaviour
 {
 
     [SerializeField]
+    [HideInInspector]
     public Point[] points;
     public Vector3Int chunkIndex;
 
@@ -77,6 +78,6 @@ public class Chunk : MonoBehaviour
 
     public void SetDensity(World world, float density, Vector3 position)
     {
-        SetDensity(world, density, Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.y), Mathf.RoundToInt(position.z));
+        SetDensity(world, density, Mathf.Clamp(Mathf.RoundToInt(position.x), 0, world.chunkSize + 1), Mathf.Clamp(Mathf.RoundToInt(position.y), 0, world.chunkSize + 1), Mathf.Clamp(Mathf.RoundToInt(position.z), 0, world.chunkSize + 1));
     }
 }

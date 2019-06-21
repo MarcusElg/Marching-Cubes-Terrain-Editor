@@ -14,32 +14,13 @@ public class TerrainEditor : MonoBehaviour
         Vector3 hitPos = new Vector3(hitX, hitY, hitZ);
 
         int intRange = world.range.Ceil();
-        List<Chunk> chunksToUpdate = new List<Chunk>();
 
         // Dertermine what chunks to update
-        Chunk chunk = world.GetChunk(hitPos + new Vector3(world.range, 1, world.range));
-        if (chunk != null && !chunksToUpdate.Contains(chunk))
-        {
-            chunksToUpdate.Add(chunk);
-        }
-
-        chunk = world.GetChunk(hitPos + new Vector3(world.range, 1, -world.range));
-        if (chunk != null && !chunksToUpdate.Contains(chunk))
-        {
-            chunksToUpdate.Add(chunk);
-        }
-
-        chunk = world.GetChunk(hitPos + new Vector3(-world.range, 1, world.range));
-        if (chunk != null && !chunksToUpdate.Contains(chunk))
-        {
-            chunksToUpdate.Add(chunk);
-        }
-
-        chunk = world.GetChunk(hitPos + new Vector3(-world.range, 1, -world.range));
-        if (chunk != null && !chunksToUpdate.Contains(chunk))
-        {
-            chunksToUpdate.Add(chunk);
-        }
+        Chunk centerChunk = world.GetChunk(point + new Vector3(0, 10, 0));
+        Chunk topLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 10, world.range + 0.1f));
+        Chunk topRightChunk = world.GetChunk(point + new Vector3(world.range + 0.1f, 10, world.range + 0.1f));
+        Chunk bottomLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 10, -world.range - 0.1f));
+        Chunk bottomRightChunk = world.GetChunk(point + new Vector3(world.range + 0.1f, 10, -world.range - 0.1f));
 
         for (int x = -intRange; x <= intRange; x++)
         {
@@ -67,16 +48,60 @@ public class TerrainEditor : MonoBehaviour
                         float oldDensity = world.GetPoint(new Vector3Int(Mathf.RoundToInt(point2.x), Mathf.RoundToInt(point2.y), Mathf.RoundToInt(point2.z))).density;
                         float newDensity = oldDensity - modificationAmount;
                         newDensity = newDensity.Clamp01();
-                        chunk2.SetDensity(world, newDensity, point2);
+
+                        Point p = chunk2.GetPoint(world, new Vector3Int(Mathf.RoundToInt(point.x), Mathf.RoundToInt(point2.y), Mathf.RoundToInt(point2.z)));
+
+                        // Don't edit last points as they should be edited by the others first points
+                        if (p.localPosition.x < world.chunkSize && p.localPosition.z < world.chunkSize)
+                        {
+                            if (Mathf.RoundToInt(point2.x) == 0)
+                            {
+                                Chunk borderChunk = world.GetChunk(offsetedX - 1, offsetedY + 1, offsetedZ);
+
+                                if (borderChunk != null)
+                                {
+                                    borderChunk.SetDensity(world, newDensity, new Vector3(world.chunkSize, point2.y, point2.z));
+                                }
+                            }
+
+                            if (Mathf.RoundToInt(point2.z) == 0)
+                            {
+                                Chunk borderChunk = world.GetChunk(offsetedX, offsetedY + 1, offsetedZ - 1);
+
+                                if (borderChunk != null)
+                                {
+                                    borderChunk.SetDensity(world, newDensity, new Vector3(point2.x, point2.y, world.chunkSize));
+                                }
+                            }
+
+                            chunk2.SetDensity(world, newDensity, point2);
+                        }
                     }
                 }
             }
         }
 
         // Update chunks
-        for (int i = 0; i < chunksToUpdate.Count; i++)
+        centerChunk.Generate(world);
+
+        if (topLeftChunk != null)
         {
-            chunksToUpdate[i].Generate(world);
+            topLeftChunk.Generate(world);
+        }
+
+        if (topRightChunk != null)
+        {
+            topRightChunk.Generate(world);
+        }
+
+        if (bottomLeftChunk != null)
+        {
+            bottomLeftChunk.Generate(world);
+        }
+
+        if (bottomRightChunk != null)
+        {
+            bottomRightChunk.Generate(world);
         }
     }
 
