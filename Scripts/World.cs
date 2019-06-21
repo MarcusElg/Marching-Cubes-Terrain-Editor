@@ -13,6 +13,9 @@ public class World : MonoBehaviour
 
     // Paint
     public Color colour;
+    public bool useColourMask = false;
+    public Color colourMask;
+    public float colourMaskTolerance = 0.01f;
 
     public int chunkSize = 8;
     public float groundHeight = 10;

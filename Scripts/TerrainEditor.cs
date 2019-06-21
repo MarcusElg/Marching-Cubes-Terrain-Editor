@@ -214,7 +214,23 @@ public class TerrainEditor : MonoBehaviour
 
                     if (chunk2 != null)
                     {
-                        chunk2.SetColor(world, world.colour, (new Vector3(offsetedX, offsetedY, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x);
+                        if (world.useColourMask == false)
+                        {
+                            chunk2.SetColor(world, world.colour, (new Vector3(offsetedX, offsetedY, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x);
+                        }
+                        else
+                        {
+                            Color colour = chunk2.GetPoint(world, (new Vector3(offsetedX, offsetedY, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x).colour;
+                            float h, s, v;
+                            float h2, s2, v2;
+                            Color.RGBToHSV(colour, out h, out s, out v);
+                            Color.RGBToHSV(world.colourMask, out h2, out s2, out v2);
+
+                            if (Mathf.Abs(h - h2) < world.colourMaskTolerance && Mathf.Abs(s - s2) < world.colourMaskTolerance && Mathf.Abs(v - v2) < world.colourMaskTolerance)
+                            {
+                                chunk2.SetColor(world, world.colour, (new Vector3(offsetedX, offsetedY, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x);
+                            }
+                        }
                     }
                 }
             }

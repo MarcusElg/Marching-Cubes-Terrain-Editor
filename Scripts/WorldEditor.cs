@@ -134,6 +134,13 @@ public class WorldEditor : Editor
         EditorGUI.BeginChangeCheck();
         serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 0.1f, serializedObject.FindProperty("chunkSize").intValue * 0.75f * world.transform.lossyScale.x);
         serializedObject.FindProperty("colour").colorValue = EditorGUILayout.ColorField("Colour", serializedObject.FindProperty("colour").colorValue);
+        serializedObject.FindProperty("useColourMask").boolValue = EditorGUILayout.Toggle("Use Colour Mask", serializedObject.FindProperty("useColourMask").boolValue);
+
+        if (serializedObject.FindProperty("useColourMask").boolValue == true)
+        {
+            serializedObject.FindProperty("colourMask").colorValue = EditorGUILayout.ColorField("Colour Mask", serializedObject.FindProperty("colourMask").colorValue);
+            serializedObject.FindProperty("colourMaskTolerance").floatValue = Mathf.Clamp01(EditorGUILayout.FloatField("Colour Mask Tolerance", serializedObject.FindProperty("colourMaskTolerance").floatValue));
+        }
 
         if (GUILayout.Button("Paint All"))
         {

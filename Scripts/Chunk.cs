@@ -60,6 +60,11 @@ public class Chunk : MonoBehaviour
         GetComponent<MeshCollider>().sharedMesh = mesh;
     }
 
+    public Point GetPoint(World world, Vector3 pos)
+    {
+        return GetPoint(world, Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y), Mathf.RoundToInt(pos.z));
+    }
+
     public Point GetPoint(World world, Vector3Int pos)
     {
         return GetPoint(world, pos.x, pos.y, pos.z);
