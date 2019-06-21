@@ -23,6 +23,7 @@ public class WorldEditor : Editor
         rightButtonDown = false;
         world = (World)target;
 
+        world.settings = MarchingCubesSettings.GetSerializedSettings();
         world.densityGenerator = new DensityGenerator(world.seed);
 
         if (world.transform.childCount == 0)
@@ -90,6 +91,7 @@ public class WorldEditor : Editor
         }
 
         // Shared
+        GUILayout.Space(20);
         DrawLine();
 
         if (GUILayout.Button("Generate Terrain"))

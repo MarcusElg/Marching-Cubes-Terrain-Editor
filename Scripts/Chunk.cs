@@ -15,9 +15,16 @@ public class Chunk : MonoBehaviour
     {
         transform.SetParent(world.transform, false);
         transform.localScale = Vector3.one;
-        gameObject.hideFlags = HideFlags.NotEditable;
         name = chunkIndex.ToString();
         gameObject.layer = LayerMask.NameToLayer("Chunk");
+
+        if (world.settings.FindProperty("hideNonEditableChildren").boolValue == true)
+        {
+            gameObject.hideFlags = HideFlags.HideInHierarchy;
+        } else
+        {
+            gameObject.hideFlags = HideFlags.NotEditable;
+        }
 
         this.chunkIndex = chunkIndex;
         points = new Point[(int)Mathf.Pow(world.chunkSize + 1, 3)];

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class World : MonoBehaviour
@@ -35,6 +36,8 @@ public class World : MonoBehaviour
 
     public Vector3Int chunkStartIndexToAdd;
     public Vector3Int chunkEndIndexToAdd;
+
+    public SerializedObject settings;
 
     public void Generate()
     {
