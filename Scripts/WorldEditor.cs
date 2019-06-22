@@ -299,14 +299,11 @@ public class WorldEditor : Editor
                 {
                     World world = raycastHit.transform.parent.GetComponent<World>();
 
-                    if (world.terrainMode != World.TerrainMode.Options && (world.terrainMode != World.TerrainMode.Paint || world.paintSingleTriangle == false))
-                    {
-                        Handles.color = Color.white;
-                        Handles.DrawWireDisc(raycastHit.point, Vector3.up, world.range);
-                    }
-
                     if (world.terrainMode == World.TerrainMode.Modify)
                     {
+                        Handles.color = Color.white;
+                        Handles.DrawWireDisc(raycastHit.point, raycastHit.normal, world.range);
+
                         if (leftButtonDown == true || rightButtonDown == true)
                         {
                             bool raise = true;
@@ -321,6 +318,9 @@ public class WorldEditor : Editor
                     }
                     else if (world.terrainMode == World.TerrainMode.Set)
                     {
+                        Handles.color = Color.white;
+                        Handles.DrawWireDisc(raycastHit.point, Vector3.up, world.range);
+
                         if (leftButtonDown == true)
                         {
                             TerrainEditor.SetTerrain(world, raycastHit.point);
@@ -336,6 +336,10 @@ public class WorldEditor : Editor
                         {
                             Handles.color = Color.white;
                             Handles.DrawWireDisc(raycastHit.point, Vector3.up, 0.1f);
+                        } else
+                        {
+                            Handles.color = Color.white;
+                            Handles.DrawWireDisc(raycastHit.point, raycastHit.normal, world.range);
                         }
 
                         if (leftButtonDown == true)
