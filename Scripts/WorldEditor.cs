@@ -289,10 +289,9 @@ public class WorldEditor : Editor
                 middleButtonDown = false;
             }
         }
-
-        // Brushes
-        if (Event.current.shift == false)
+        else if (Event.current.shift == false)
         {
+            // Brushes
             if (Physics.Raycast(ray, out raycastHit))
             {
                 if (raycastHit.transform.GetComponent<Chunk>() != null)
@@ -336,7 +335,8 @@ public class WorldEditor : Editor
                         {
                             Handles.color = Color.white;
                             Handles.DrawWireDisc(raycastHit.point, Vector3.up, 0.1f);
-                        } else
+                        }
+                        else
                         {
                             Handles.color = Color.white;
                             Handles.DrawWireDisc(raycastHit.point, raycastHit.normal, world.range);
