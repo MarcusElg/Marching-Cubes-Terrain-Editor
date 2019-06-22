@@ -140,7 +140,13 @@ public class WorldEditor : Editor
     private void InspectorPaint()
     {
         EditorGUI.BeginChangeCheck();
-        serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 0.1f, serializedObject.FindProperty("chunkSize").intValue * 0.75f * world.transform.lossyScale.x);
+        serializedObject.FindProperty("paintSingleTriangle").boolValue = EditorGUILayout.Toggle("Paint Single Point", serializedObject.FindProperty("paintSingleTriangle").boolValue);
+
+        if (serializedObject.FindProperty("paintSingleTriangle").boolValue == false)
+        {
+            serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 0.1f, serializedObject.FindProperty("chunkSize").intValue * 0.75f * world.transform.lossyScale.x);
+        }
+
         serializedObject.FindProperty("colour").colorValue = EditorGUILayout.ColorField("Colour", serializedObject.FindProperty("colour").colorValue);
         serializedObject.FindProperty("useColourMask").boolValue = EditorGUILayout.Toggle("Use Colour Mask", serializedObject.FindProperty("useColourMask").boolValue);
 
@@ -293,7 +299,7 @@ public class WorldEditor : Editor
                 {
                     World world = raycastHit.transform.parent.GetComponent<World>();
 
-                    if (world.terrainMode != World.TerrainMode.Options)
+                    if (world.terrainMode != World.TerrainMode.Options && (world.terrainMode != World.TerrainMode.Paint || world.paintSingleTriangle == false))
                     {
                         Handles.color = Color.white;
                         Handles.DrawWireDisc(raycastHit.point, Vector3.up, world.range);
@@ -326,9 +332,22 @@ public class WorldEditor : Editor
                     }
                     else if (world.terrainMode == World.TerrainMode.Paint)
                     {
+                        if (world.paintSingleTriangle == true)
+                        {
+                            Handles.color = Color.white;
+                            Handles.DrawWireDisc(raycastHit.point, Vector3.up, 0.1f);
+                        }
+
                         if (leftButtonDown == true)
                         {
-                            TerrainEditor.PaintTerrain(world, raycastHit.point);
+                            if (world.paintSingleTriangle == true)
+                            {
+                                TerrainEditor.PaintPoint(world, raycastHit.point);
+                            }
+                            else
+                            {
+                                TerrainEditor.PaintTerrain(world, raycastHit.point);
+                            }
                         }
                         else if (middleButtonDown == true)
                         {

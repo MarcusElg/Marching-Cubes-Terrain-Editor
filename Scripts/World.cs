@@ -13,6 +13,7 @@ public class World : MonoBehaviour
     public int targetHeight = 10;
 
     // Paint
+    public bool paintSingleTriangle = false;
     public Color colour;
     public bool useColourMask = false;
     public Color colourMask;
@@ -88,6 +89,11 @@ public class World : MonoBehaviour
         }
 
         return null;
+    }
+
+    public Point GetPoint(Vector3 pos)
+    {
+        return GetPoint(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y), Mathf.RoundToInt(pos.z));
     }
 
     public Point GetPoint(Vector3Int pos)

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class TerrainEditor : MonoBehaviour
+public static class TerrainEditor
 {
 
     public static void ModifyTerrain(World world, Vector3 point, bool addTerrain)
@@ -260,5 +260,29 @@ public class TerrainEditor : MonoBehaviour
         }
     }
 
+    public static void PaintPoint(World world, Vector3 position)
+    {
+        Chunk chunk = world.GetChunk(position + new Vector3(0, 1, 0));
+        Point point = chunk.GetPoint(world, (position - chunk.transform.position) / world.transform.lossyScale.x);
+
+        if (world.useColourMask == false)
+        {
+            chunk.SetColor(world, world.colour, (position - chunk.transform.position) / world.transform.lossyScale.x);
+        }
+        else
+        {
+            float h, s, v;
+            float h2, s2, v2;
+            Color.RGBToHSV(point.colour, out h, out s, out v);
+            Color.RGBToHSV(world.colourMask, out h2, out s2, out v2);
+
+            if (Mathf.Abs(h - h2) < world.colourMaskTolerance && Mathf.Abs(s - s2) < world.colourMaskTolerance && Mathf.Abs(v - v2) < world.colourMaskTolerance)
+            {
+                chunk.SetColor(world, world.colour, (position - chunk.transform.position) / world.transform.lossyScale.x);
+            }
+        }
+
+        chunk.Generate(world);
+    }
 }
 
