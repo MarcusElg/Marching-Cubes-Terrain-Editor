@@ -63,18 +63,23 @@ public class MarchingCubes
 
         for (int i = 0; i < row.Length; i += 3)
         {
+            Color firstColour = _colours2[row[i + 0]];
+            Color secondColour = _colours2[row[i + 1]];
+            Color thirdColour = _colours2[row[i + 2]];
+            Color averageColour = new Color((firstColour.r + secondColour.r + thirdColour.r) / 3, (firstColour.g + secondColour.g + thirdColour.g) / 3, (firstColour.b + secondColour.b + thirdColour.b) / 3, (firstColour.a + secondColour.a + thirdColour.a) / 3);
+
             _vertices[_vertexIndex] = _vertexList[row[i + 0]];
-            _colours[_vertexIndex] = _colours2[row[i + 0]];
+            _colours[_vertexIndex] = averageColour;
             _triangles[_vertexIndex] = _vertexIndex;
             _vertexIndex++;
 
             _vertices[_vertexIndex] = _vertexList[row[i + 1]];
-            _colours[_vertexIndex] = _colours2[row[i + 1]];
+            _colours[_vertexIndex] = averageColour;
             _triangles[_vertexIndex] = _vertexIndex;
             _vertexIndex++;
 
             _vertices[_vertexIndex] = _vertexList[row[i + 2]];
-            _colours[_vertexIndex] = _colours2[row[i + 2]];
+            _colours[_vertexIndex] = averageColour;
             _triangles[_vertexIndex] = _vertexIndex;
             _vertexIndex++;
         }
@@ -94,7 +99,7 @@ public class MarchingCubes
                 Point point2 = points[edge2];
 
                 _vertexList[i] = VertexInterpolate(point1.localPosition, point2.localPosition, point1.density, point2.density);
-                colours2[i] = point2.colour;
+                colours2[i] = new Color(Mathf.Lerp(point1.colour.r, point2.colour.r, 0.5f), Mathf.Lerp(point1.colour.g, point2.colour.g, 0.5f), Mathf.Lerp(point1.colour.b, point1.colour.b, 0.5f), Mathf.Lerp(point1.colour.a, point1.colour.a, 0.5f));
             }
         }
 
