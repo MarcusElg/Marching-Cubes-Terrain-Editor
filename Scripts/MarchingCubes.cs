@@ -6,7 +6,6 @@ public class MarchingCubes
     private Vector3[] _vertices;
     private int[] _triangles;
     private Color[] _colours;
-    private float _isoLevel;
 
     private int _vertexIndex;
 
@@ -17,14 +16,10 @@ public class MarchingCubes
 
     private readonly Vector3 zero = Vector3.zero;
 
-    public MarchingCubes(World world, Point[] points, float isoLevel, int seed)
+    public MarchingCubes(World world, Point[] points, int seed)
     {
-        _isoLevel = isoLevel;
-
         _mesh = new Mesh();
-
         _vertexIndex = 0;
-
         _vertexList = new Vector3[12];
         _initPoints = new Point[8];
         int amount = world.chunkSize + 1;
@@ -33,11 +28,11 @@ public class MarchingCubes
 
     private Vector3 VertexInterpolate(Vector3 p1, Vector3 p2, float v1, float v2)
     {
-        if (Utils.Abs(_isoLevel - v1) < 0.000001f)
+        if (Utils.Abs(1 - v1) < 0.000001f)
         {
             return p1;
         }
-        if (Utils.Abs(_isoLevel - v2) < 0.000001f)
+        if (Utils.Abs(1 - v2) < 0.000001f)
         {
             return p2;
         }
@@ -46,7 +41,7 @@ public class MarchingCubes
             return p1;
         }
 
-        float mu = (_isoLevel - v1) / (v2 - v1);
+        float mu = (1 - v1) / (v2 - v1);
 
         Vector3 p = p1 + mu * (p2 - p1);
 
@@ -106,12 +101,12 @@ public class MarchingCubes
         return _vertexList;
     }
 
-    private int CalculateCubeIndex(Point[] points, float iso)
+    private int CalculateCubeIndex(Point[] points)
     {
         int cubeIndex = 0;
 
         for (int i = 0; i < 8; i++)
-            if (points[i].density < iso)
+            if (points[i].density < 1)
                 cubeIndex |= 1 << i;
 
         return cubeIndex;
@@ -178,7 +173,7 @@ public class MarchingCubes
                 {
                     _initPoints = GetPoints(world, x, y, z, points);
 
-                    _cubeIndexes[x, y, z] = CalculateCubeIndex(_initPoints, _isoLevel);
+                    _cubeIndexes[x, y, z] = CalculateCubeIndex(_initPoints);
                 }
             }
         }

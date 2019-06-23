@@ -51,7 +51,7 @@ public class Chunk : MonoBehaviour
     public void UpdateAfterReload(World world)
     {
         _densityGenerator = world.densityGenerator;
-        _marchingCubes = new MarchingCubes(world, points, world.isoLevel, world.seed);
+        _marchingCubes = new MarchingCubes(world, points, world.seed);
     }
 
     public void Generate(World world)

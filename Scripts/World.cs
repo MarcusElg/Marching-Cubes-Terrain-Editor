@@ -22,8 +22,6 @@ public class World : MonoBehaviour
     public int chunkSize = 8;
     public float groundHeight = 10;
 
-    public float isoLevel;
-
     public bool randomizeSeed = true;
     public int seed;
     public GameObject chunkPrefab;

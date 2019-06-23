@@ -202,16 +202,6 @@ public class WorldEditor : Editor
         GUIStyle boldStyle = new GUIStyle();
         boldStyle.fontStyle = FontStyle.Bold;
 
-        GUILayout.Label("Options", boldStyle);
-        EditorGUI.BeginChangeCheck();
-        serializedObject.FindProperty("isoLevel").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Iso Level", serializedObject.FindProperty("isoLevel").floatValue), 0.01f, 0.99f);
-
-        if (EditorGUI.EndChangeCheck() == true)
-        {
-            serializedObject.ApplyModifiedPropertiesWithoutUndo();
-            world.Generate();
-        }
-
         EditorGUI.BeginChangeCheck();
 
         GUILayout.Space(20);
