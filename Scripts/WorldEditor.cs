@@ -131,6 +131,28 @@ public class WorldEditor : Editor
         serializedObject.FindProperty("forceOverDistance").animationCurveValue = EditorGUILayout.CurveField("Force Over Distance", serializedObject.FindProperty("forceOverDistance").animationCurveValue);
         serializedObject.FindProperty("targetHeight").intValue = Mathf.Clamp(EditorGUILayout.IntField("Target Height", serializedObject.FindProperty("targetHeight").intValue), 0, serializedObject.FindProperty("chunkSize").intValue);
 
+        if (GUILayout.Button("Set All") == true)
+        {
+            for (int i = 0; i < world.transform.childCount; i++)
+            {
+                for (int j = 0; j < world.transform.GetChild(i).GetComponent<Chunk>().points.Length; j++)
+                {
+                    float y = world.transform.GetChild(i).GetComponent<Chunk>().points[j].localPosition.y + world.transform.GetChild(i).localPosition.y;
+
+                    if (y > world.targetHeight)
+                    {
+                        world.transform.GetChild(i).GetComponent<Chunk>().points[j].density = 1;
+                    }
+                    else
+                    {
+                        world.transform.GetChild(i).GetComponent<Chunk>().points[j].density = 0;
+                    }
+                }
+            }
+
+            world.Generate();
+        }
+
         if (EditorGUI.EndChangeCheck() == true)
         {
             serializedObject.ApplyModifiedPropertiesWithoutUndo();

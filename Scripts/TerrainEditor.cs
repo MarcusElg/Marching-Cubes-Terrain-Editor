@@ -157,16 +157,18 @@ public static class TerrainEditor
 
                 if (chunk2 != null)
                 {
-                    for (int i = world.targetHeight + 1; i < world.chunkSize; i++)
+                    for (int y = 0; y < world.chunkSize; y++)
                     {
-                        Vector3 position = (new Vector3(offsetedX, i, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x;
-                        chunk2.SetDensity(world, 1, position);
-                    }
-
-                    for (int i = world.targetHeight; i >= 0; i--)
-                    {
-                        Vector3 position = (new Vector3(offsetedX, i, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x;
-                        chunk2.SetDensity(world, 0, position);
+                        if (y + chunk2.transform.localPosition.y >= world.targetHeight)
+                        {
+                            Vector3 position = (new Vector3(offsetedX, chunk2.transform.position.y, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x + new Vector3(0, y, 0);
+                            chunk2.SetDensity(world, 1, position);
+                        }
+                        else
+                        {
+                            Vector3 position = (new Vector3(offsetedX, chunk2.transform.position.y, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x + new Vector3(0, y, 0);
+                            chunk2.SetDensity(world, 0, position);
+                        }
                     }
                 }
             }
