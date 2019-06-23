@@ -106,7 +106,7 @@ public class WorldEditor : Editor
 
         if (GUILayout.Button("Remove All Chunks"))
         {
-            world.RemoveChunks();
+            world.RemoveAllChunks();
             world.AddChunks(Vector3Int.zero, Vector3Int.zero);
         }
     }
@@ -219,19 +219,28 @@ public class WorldEditor : Editor
         serializedObject.FindProperty("chunkStartIndexToAdd").vector3IntValue = ClampVector3(EditorGUILayout.Vector3IntField("Start Chunk Index", serializedObject.FindProperty("chunkStartIndexToAdd").vector3IntValue), Vector3.zero, new Vector3(100, 10, 100));
         serializedObject.FindProperty("chunkEndIndexToAdd").vector3IntValue = ClampVector3(EditorGUILayout.Vector3IntField("End Chunk Index", serializedObject.FindProperty("chunkEndIndexToAdd").vector3IntValue), serializedObject.FindProperty("chunkStartIndexToAdd").vector3IntValue, new Vector3(100, 10, 100));
 
-        if (EditorGUI.EndChangeCheck())
-        {
-            serializedObject.ApplyModifiedPropertiesWithoutUndo();
-        }
-
         if (GUILayout.Button("Add"))
         {
             world.AddChunks(serializedObject.FindProperty("chunkStartIndexToAdd").vector3IntValue, serializedObject.FindProperty("chunkEndIndexToAdd").vector3IntValue);
         }
 
+        GUILayout.Label("Remove Chunks", boldStyle);
+        serializedObject.FindProperty("chunkStartIndexToAdd").vector3IntValue = ClampVector3(EditorGUILayout.Vector3IntField("Start Chunk Index", serializedObject.FindProperty("chunkStartIndexToAdd").vector3IntValue), Vector3.zero, new Vector3(100, 10, 100));
+        serializedObject.FindProperty("chunkEndIndexToAdd").vector3IntValue = ClampVector3(EditorGUILayout.Vector3IntField("End Chunk Index", serializedObject.FindProperty("chunkEndIndexToAdd").vector3IntValue), serializedObject.FindProperty("chunkStartIndexToAdd").vector3IntValue, new Vector3(100, 10, 100));
+
+        if (EditorGUI.EndChangeCheck())
+        {
+            serializedObject.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        if (GUILayout.Button("Remove"))
+        {
+            world.RemoveChunks(serializedObject.FindProperty("chunkStartIndexToAdd").vector3IntValue, serializedObject.FindProperty("chunkEndIndexToAdd").vector3IntValue);
+        }
+
         EditorGUI.BeginChangeCheck();
         GUILayout.Space(20);
-        GUILayout.Label("Resetting options", boldStyle);
+        GUILayout.Label("Resetting Options", boldStyle);
         GUILayout.Label("Warning: changing these options will reset your terrain without undo support");
         serializedObject.FindProperty("chunkSize").intValue = Mathf.Clamp(EditorGUILayout.IntField("Chunk Divisions", serializedObject.FindProperty("chunkSize").intValue), 1, 50);
 

@@ -63,7 +63,27 @@ public class World : MonoBehaviour
         }
     }
 
-    public void RemoveChunks()
+    public void RemoveChunks(Vector3Int startIndex, Vector3Int endIndex)
+    {
+        for (int x = startIndex.x; x < endIndex.x + 1; x++)
+        {
+            for (int y = startIndex.y; y < endIndex.y + 1; y++)
+            {
+                for (int z = startIndex.z; z < endIndex.z + 1; z++)
+                {
+                    for (int i = 0; i < transform.childCount; i++)
+                    {
+                        if (transform.GetChild(i).GetComponent<Chunk>().chunkIndex == new Vector3(x, y, z))
+                        {
+                            DestroyImmediate(transform.GetChild(i).gameObject);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void RemoveAllChunks()
     {
         for (int i = transform.childCount - 1; i >= 0; i--)
         {
