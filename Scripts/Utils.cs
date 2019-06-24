@@ -36,9 +36,9 @@ public static class Utils
             return floored + 1;
     }
 
-    public static int RoundToNearestX(this float n, int x)
+    public static float RoundToNearestX(this float n, float x)
     {
-        return Round(n / x) * x;
+        return Mathf.Round(n / x) * x;
     }
 
     public static int FloorToNearestX(this float n, int x)

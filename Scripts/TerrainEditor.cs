@@ -13,8 +13,6 @@ public static class TerrainEditor
         int hitZ = point.z.Round();
         Vector3 hitPos = new Vector3(hitX, hitY, hitZ);
 
-        int intRange = world.range.Ceil();
-
         // Dertermine what chunks to update
         Chunk centerChunk = world.GetChunk(point + new Vector3(0, 10, 0));
         Chunk topLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 10, world.range + 0.1f));
@@ -22,11 +20,11 @@ public static class TerrainEditor
         Chunk bottomLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 10, -world.range - 0.1f));
         Chunk bottomRightChunk = world.GetChunk(point + new Vector3(world.range + 0.1f, 10, -world.range - 0.1f));
 
-        for (int x = -intRange; x <= intRange; x++)
+        for (int x = -world.range; x <= world.range; x++)
         {
-            for (int y = -intRange; y <= intRange; y++)
+            for (int y = -world.range; y <= world.range; y++)
             {
-                for (int z = -intRange; z <= intRange; z++)
+                for (int z = -world.range; z <= world.range; z++)
                 {
                     int offsetedX = hitX - x;
                     int offsetedY = hitY - y;
@@ -112,7 +110,6 @@ public static class TerrainEditor
         int hitZ = point.z.Round();
         Vector3 hitPos = new Vector3(hitX, hitY, hitZ);
 
-        int intRange = world.range.Ceil();
         List<Chunk> chunksToUpdate = new List<Chunk>();
 
         // Dertermine what chunks to update
@@ -140,9 +137,9 @@ public static class TerrainEditor
             chunksToUpdate.Add(chunk);
         }
 
-        for (int x = -intRange; x <= intRange; x++)
+        for (int x = -world.range; x <= world.range; x++)
         {
-            for (int z = -intRange; z <= intRange; z++)
+            for (int z = -world.range; z <= world.range; z++)
             {
                 int offsetedX = hitX - x;
                 int offsetedZ = hitZ - z;
@@ -157,7 +154,7 @@ public static class TerrainEditor
 
                 if (chunk2 != null)
                 {
-                    for (int y = 0; y < world.chunkSize; y++)
+                    for (int y = 0; y <= world.chunkSize; y++)
                     {
                         if (y + chunk2.transform.localPosition.y >= world.targetHeight)
                         {
@@ -181,13 +178,61 @@ public static class TerrainEditor
         }
     }
 
+    public static void LineTerrain(World world, Vector3 startPosition, Vector3 endPosition)
+    {
+        float distance = Vector3.Distance(startPosition, endPosition);
+        float distancePerLerp = 1f / distance;
+
+        Vector3 forward = world.startPosition - world.endPosition;
+        Vector3 left = new Vector3(-forward.z, 0, forward.x).normalized;
+
+        List<Chunk> chunksToUpdate = new List<Chunk>();
+
+        for (float f = 0; f < 1; f += distancePerLerp)
+        {
+            Vector3 position = Vector3.Lerp(startPosition, endPosition, f);
+
+            int startY = -world.range;
+            if (world.flatFloor == true)
+            {
+                startY = 0;
+            }
+
+            for (int x = -world.range; x <= world.range; x++)
+            {
+                for (int y = startY; y <= world.range; y++)
+                {
+                    Vector3 offsetPosition = position + left * x + Vector3.up * y;
+                    Chunk chunk = world.GetChunk(new Vector3(offsetPosition.x, (offsetPosition.y - world.transform.position.y).CeilToNearestX(world.chunkSize * world.transform.lossyScale.x) + world.transform.position.y, offsetPosition.z));
+
+                    if (!chunksToUpdate.Contains(chunk))
+                    {
+                        chunksToUpdate.Add(chunk);
+                    }
+
+                    float distanceToCenter = Vector3.Distance(position + new Vector3(x, y, 0), position);
+                    if (!(distanceToCenter <= world.range))
+                    {
+                        continue;
+                    }
+
+                    chunk.SetDensity(world, 1, (offsetPosition - chunk.transform.position) / world.transform.lossyScale.x);
+                }
+            }
+        }
+
+        for (int i = 0; i < chunksToUpdate.Count; i++)
+        {
+            chunksToUpdate[i].Generate(world);
+        }
+    }
+
     public static void PaintTerrain(World world, Vector3 point)
     {
         int hitX = point.x.Round();
         int hitY = point.y.Round();
         int hitZ = point.z.Round();
         Vector3 hitPos = new Vector3(hitX, hitY, hitZ);
-        int intRange = world.range.Ceil();
 
         // Dertermine what chunks to update
         Chunk centerChunk = world.GetChunk(point + new Vector3(0, 10, 0));
@@ -196,11 +241,11 @@ public static class TerrainEditor
         Chunk bottomLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 10, -world.range - 0.1f));
         Chunk bottomRightChunk = world.GetChunk(point + new Vector3(world.range + 0.1f, 10, -world.range - 0.1f));
 
-        for (int x = -intRange; x <= intRange; x++)
+        for (int x = -world.range; x <= world.range; x++)
         {
-            for (int y = -intRange; y <= intRange; y++)
+            for (int y = -world.range; y <= world.range; y++)
             {
-                for (int z = -intRange; z <= intRange; z++)
+                for (int z = -world.range; z <= world.range; z++)
                 {
                     int offsetedX = hitX - x;
                     int offsetedY = hitY - y;

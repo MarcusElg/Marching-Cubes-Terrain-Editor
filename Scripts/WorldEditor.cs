@@ -50,7 +50,7 @@ public class WorldEditor : Editor
         {
             serializedObject.FindProperty("terrainMode").enumValueIndex = 1;
         }
-        else if (GUILayout.Button("Ramp"))
+        else if (GUILayout.Button("Line"))
         {
             serializedObject.FindProperty("terrainMode").enumValueIndex = 2;
         }
@@ -77,6 +77,9 @@ public class WorldEditor : Editor
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
         }
 
+        DrawLine();
+        GUILayout.Space(20);
+
         if (serializedObject.FindProperty("terrainMode").enumValueIndex == 0)
         {
             InspectorModify();
@@ -87,7 +90,7 @@ public class WorldEditor : Editor
         }
         else if (serializedObject.FindProperty("terrainMode").enumValueIndex == 2)
         {
-            InspectorRamp();
+            InspectorLine();
         }
         else if (serializedObject.FindProperty("terrainMode").enumValueIndex == 3)
         {
@@ -126,7 +129,7 @@ public class WorldEditor : Editor
     private void InspectorModify()
     {
         EditorGUI.BeginChangeCheck();
-        serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 0.1f, serializedObject.FindProperty("chunkSize").intValue * 0.75f * world.transform.lossyScale.x);
+        serializedObject.FindProperty("range").intValue = Mathf.Clamp(EditorGUILayout.IntField("Range", serializedObject.FindProperty("range").intValue), 1, Mathf.RoundToInt(serializedObject.FindProperty("chunkSize").intValue * 0.75f * world.transform.lossyScale.x));
         serializedObject.FindProperty("force").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Force", serializedObject.FindProperty("force").floatValue), 0.1f, 10f);
         serializedObject.FindProperty("forceOverDistance").animationCurveValue = EditorGUILayout.CurveField("Force Over Distance", serializedObject.FindProperty("forceOverDistance").animationCurveValue);
 
@@ -139,7 +142,7 @@ public class WorldEditor : Editor
     private void InspectorSet()
     {
         EditorGUI.BeginChangeCheck();
-        serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 0.1f, serializedObject.FindProperty("chunkSize").intValue * 0.75f * world.transform.lossyScale.x);
+        serializedObject.FindProperty("range").intValue = Mathf.Clamp(EditorGUILayout.IntField("Range", serializedObject.FindProperty("range").intValue), 1, Mathf.RoundToInt(serializedObject.FindProperty("chunkSize").intValue * 0.75f * world.transform.lossyScale.x));
         serializedObject.FindProperty("forceOverDistance").animationCurveValue = EditorGUILayout.CurveField("Force Over Distance", serializedObject.FindProperty("forceOverDistance").animationCurveValue);
         serializedObject.FindProperty("targetHeight").intValue = Mathf.Clamp(EditorGUILayout.IntField("Target Height", serializedObject.FindProperty("targetHeight").intValue), 1, serializedObject.FindProperty("chunkSize").intValue);
 
@@ -171,10 +174,16 @@ public class WorldEditor : Editor
         }
     }
 
-    private void InspectorRamp()
+    private void InspectorLine()
     {
         EditorGUI.BeginChangeCheck();
-        serializedObject.FindProperty("width").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Width", serializedObject.FindProperty("width").floatValue), 1f, serializedObject.FindProperty("chunkSize").intValue * 0.75f);
+        serializedObject.FindProperty("range").intValue = Mathf.Clamp(EditorGUILayout.IntField("Range", serializedObject.FindProperty("range").intValue), 1, Mathf.RoundToInt(serializedObject.FindProperty("chunkSize").intValue * 0.75f * world.transform.lossyScale.x));
+        serializedObject.FindProperty("flatFloor").boolValue = EditorGUILayout.Toggle("Flat Floor", serializedObject.FindProperty("flatFloor").boolValue);
+
+        if (GUILayout.Button("Create Space In Line"))
+        {
+            TerrainEditor.LineTerrain(world, world.startPosition, world.endPosition);
+        }
 
         if (EditorGUI.EndChangeCheck())
         {
@@ -239,8 +248,6 @@ public class WorldEditor : Editor
         boldStyle.fontStyle = FontStyle.Bold;
 
         EditorGUI.BeginChangeCheck();
-
-        GUILayout.Space(20);
         GUILayout.Label("Add Chunks", boldStyle);
         serializedObject.FindProperty("chunkStartIndexToAdd").vector3IntValue = ClampVector3(EditorGUILayout.Vector3IntField("Start Chunk Index", serializedObject.FindProperty("chunkStartIndexToAdd").vector3IntValue), Vector3.zero, new Vector3(100, 10, 100));
         serializedObject.FindProperty("chunkEndIndexToAdd").vector3IntValue = ClampVector3(EditorGUILayout.Vector3IntField("End Chunk Index", serializedObject.FindProperty("chunkEndIndexToAdd").vector3IntValue), serializedObject.FindProperty("chunkStartIndexToAdd").vector3IntValue, new Vector3(100, 10, 100));
@@ -346,7 +353,7 @@ public class WorldEditor : Editor
                 middleButtonDown = false;
             }
         }
-        else if (Event.current.shift == false || world.terrainMode == World.TerrainMode.Ramp)
+        else if (Event.current.shift == false || world.terrainMode == World.TerrainMode.Line)
         {
             // Brushes
             if (Physics.Raycast(ray, out raycastHit))
@@ -386,7 +393,7 @@ public class WorldEditor : Editor
                             world.targetHeight = Mathf.RoundToInt(raycastHit.point.y - raycastHit.transform.position.y);
                         }
                     }
-                    else if (world.terrainMode == World.TerrainMode.Ramp)
+                    else if (world.terrainMode == World.TerrainMode.Line)
                     {
                         if (world.startPosition != new Vector3(float.MaxValue, float.MaxValue, float.MaxValue) && world.endPosition != new Vector3(float.MaxValue, float.MaxValue, float.MaxValue))
                         {
@@ -395,8 +402,8 @@ public class WorldEditor : Editor
 
                             Handles.zTest = UnityEngine.Rendering.CompareFunction.Less;
                             Handles.color = world.settings.FindProperty("rampPreviewColour").colorValue;
-                            Handles.DrawLine(world.startPosition - left * world.width / 2, world.endPosition - left * world.width / 2);
-                            Handles.DrawLine(world.startPosition + left * world.width / 2, world.endPosition + left * world.width / 2);
+                            Handles.DrawLine(world.startPosition - left * world.range, world.endPosition - left * world.range / 2);
+                            Handles.DrawLine(world.startPosition + left * world.range, world.endPosition + left * world.range / 2);
                             Handles.zTest = UnityEngine.Rendering.CompareFunction.Disabled;
                         }
 
@@ -471,6 +478,8 @@ public class WorldEditor : Editor
         {
             world.seed = Random.Range(0, 10000);
         }
+
+        world.densityGenerator = new DensityGenerator(world.seed);
 
         for (int i = 0; i < world.transform.childCount; i++)
         {

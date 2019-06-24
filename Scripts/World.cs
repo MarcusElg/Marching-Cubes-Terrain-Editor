@@ -5,7 +5,7 @@ using UnityEngine;
 public class World : MonoBehaviour
 {
     /// Modify
-    public float range = 2f;
+    public int range = 2;
     public float force = 2f;
     public AnimationCurve forceOverDistance = AnimationCurve.Constant(0, 1, 1);
 
@@ -15,7 +15,7 @@ public class World : MonoBehaviour
     // Ramp
     public Vector3 startPosition =  new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
     public Vector3 endPosition = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-    public float width;
+    public bool flatFloor = false;
 
     // Paint
     public bool paintSingleTriangle = false;
@@ -35,7 +35,7 @@ public class World : MonoBehaviour
     public float noiseStretch = 1;
 
     public DensityGenerator densityGenerator;
-    public enum TerrainMode { Modify, Set, Ramp, Smooth, Paint, Options };
+    public enum TerrainMode { Modify, Set, Line, Smooth, Paint, Options };
     public TerrainMode terrainMode = TerrainMode.Set;
 
     public Vector3Int chunkStartIndexToAdd;
