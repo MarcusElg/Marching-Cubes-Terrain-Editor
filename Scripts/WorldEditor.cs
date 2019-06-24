@@ -183,7 +183,7 @@ public class WorldEditor : Editor
 
         if (GUILayout.Button("Create Space In Line"))
         {
-            TerrainEditor.LineTerrain(world, world.startPosition, world.endPosition);
+            TerrainEditor.LineTerrain(world);
         }
 
         if (EditorGUI.EndChangeCheck())
@@ -195,7 +195,7 @@ public class WorldEditor : Editor
     private void InspectorSmooth()
     {
         EditorGUI.BeginChangeCheck();
-        serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 0.1f, serializedObject.FindProperty("chunkSize").intValue * 0.75f * world.transform.lossyScale.x);
+        serializedObject.FindProperty("range").intValue = Mathf.Clamp(EditorGUILayout.IntField("Range", serializedObject.FindProperty("range").intValue), 1, Mathf.RoundToInt(serializedObject.FindProperty("chunkSize").intValue * 0.75f * world.transform.lossyScale.x));
         serializedObject.FindProperty("force").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Force", serializedObject.FindProperty("force").floatValue), 0.1f, 10f);
         serializedObject.FindProperty("forceOverDistance").animationCurveValue = EditorGUILayout.CurveField("Force Over Distance", serializedObject.FindProperty("forceOverDistance").animationCurveValue);
 
@@ -208,13 +208,8 @@ public class WorldEditor : Editor
     private void InspectorPaint()
     {
         EditorGUI.BeginChangeCheck();
-        serializedObject.FindProperty("paintSingleTriangle").boolValue = EditorGUILayout.Toggle("Paint Single Point", serializedObject.FindProperty("paintSingleTriangle").boolValue);
-
-        if (serializedObject.FindProperty("paintSingleTriangle").boolValue == false)
-        {
-            serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 0.1f, serializedObject.FindProperty("chunkSize").intValue * 0.75f * world.transform.lossyScale.x);
-        }
-
+        serializedObject.FindProperty("range").intValue = Mathf.Clamp(EditorGUILayout.IntField("Range", serializedObject.FindProperty("range").intValue), 1, Mathf.RoundToInt(serializedObject.FindProperty("chunkSize").intValue * 0.75f * world.transform.lossyScale.x));
+        serializedObject.FindProperty("roundToNearestPoint").boolValue = EditorGUILayout.Toggle("Round To Nearest Point", serializedObject.FindProperty("roundToNearestPoint").boolValue);
         serializedObject.FindProperty("colour").colorValue = EditorGUILayout.ColorField("Colour", serializedObject.FindProperty("colour").colorValue);
         serializedObject.FindProperty("useColourMask").boolValue = EditorGUILayout.Toggle("Use Colour Mask", serializedObject.FindProperty("useColourMask").boolValue);
 
@@ -427,27 +422,12 @@ public class WorldEditor : Editor
                     }
                     else if (world.terrainMode == World.TerrainMode.Paint)
                     {
-                        if (world.paintSingleTriangle == true)
-                        {
-                            Handles.color = Color.white;
-                            Handles.DrawWireDisc(raycastHit.point, Vector3.up, 0.1f);
-                        }
-                        else
-                        {
-                            Handles.color = Color.white;
-                            Handles.DrawWireDisc(raycastHit.point, raycastHit.normal, world.range);
-                        }
+                        Handles.color = Color.white;
+                        Handles.DrawWireDisc(raycastHit.point, raycastHit.normal, world.range);
 
                         if (leftButtonDown == true)
                         {
-                            if (world.paintSingleTriangle == true)
-                            {
-                                TerrainEditor.PaintPoint(world, raycastHit.point);
-                            }
-                            else
-                            {
-                                TerrainEditor.PaintTerrain(world, raycastHit.point);
-                            }
+                            TerrainEditor.PaintTerrain(world, raycastHit.point);
                         }
                         else if (middleButtonDown == true)
                         {

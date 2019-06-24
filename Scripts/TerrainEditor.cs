@@ -178,9 +178,9 @@ public static class TerrainEditor
         }
     }
 
-    public static void LineTerrain(World world, Vector3 startPosition, Vector3 endPosition)
+    public static void LineTerrain(World world)
     {
-        float distance = Vector3.Distance(startPosition, endPosition);
+        float distance = Vector3.Distance(world.startPosition, world.endPosition);
         float distancePerLerp = 1f / distance;
 
         Vector3 forward = world.startPosition - world.endPosition;
@@ -190,7 +190,7 @@ public static class TerrainEditor
 
         for (float f = 0; f < 1; f += distancePerLerp)
         {
-            Vector3 position = Vector3.Lerp(startPosition, endPosition, f);
+            Vector3 position = Vector3.Lerp(world.startPosition, world.endPosition, f);
 
             int startY = -world.range;
             if (world.flatFloor == true)
@@ -254,10 +254,10 @@ public static class TerrainEditor
 
     public static void PaintTerrain(World world, Vector3 point)
     {
-        int hitX = point.x.Round();
-        int hitY = point.y.Round();
-        int hitZ = point.z.Round();
-        Vector3 hitPos = new Vector3(hitX, hitY, hitZ);
+        if (world.roundToNearestPoint == true)
+        {
+            point = (point - world.transform.position).RoundToNearestX(world.transform.lossyScale.x) + world.transform.position;
+        }
 
         // Dertermine what chunks to update
         Chunk centerChunk = world.GetChunk(point + new Vector3(0, 10, 0));
@@ -272,9 +272,9 @@ public static class TerrainEditor
             {
                 for (int z = -world.range; z <= world.range; z++)
                 {
-                    int offsetedX = hitX - x;
-                    int offsetedY = hitY - y;
-                    int offsetedZ = hitZ - z;
+                    float offsetedX = point.x - x;
+                    float offsetedY = point.y - y;
+                    float offsetedZ = point.z - z;
 
                     float distance = Utils.Distance(offsetedX, offsetedY, offsetedZ, point);
                     if (!(distance <= world.range))
@@ -330,31 +330,6 @@ public static class TerrainEditor
         {
             bottomRightChunk.Generate(world);
         }
-    }
-
-    public static void PaintPoint(World world, Vector3 position)
-    {
-        Chunk chunk = world.GetChunk(position + new Vector3(0, 1, 0));
-        Point point = chunk.GetPoint(world, (position - chunk.transform.position) / world.transform.lossyScale.x);
-
-        if (world.useColourMask == false)
-        {
-            chunk.SetColor(world, world.colour, (position - chunk.transform.position) / world.transform.lossyScale.x);
-        }
-        else
-        {
-            float h, s, v;
-            float h2, s2, v2;
-            Color.RGBToHSV(point.colour, out h, out s, out v);
-            Color.RGBToHSV(world.colourMask, out h2, out s2, out v2);
-
-            if (Mathf.Abs(h - h2) < world.colourMaskTolerance && Mathf.Abs(s - s2) < world.colourMaskTolerance && Mathf.Abs(v - v2) < world.colourMaskTolerance)
-            {
-                chunk.SetColor(world, world.colour, (position - chunk.transform.position) / world.transform.lossyScale.x);
-            }
-        }
-
-        chunk.Generate(world);
     }
 }
 

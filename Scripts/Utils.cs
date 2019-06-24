@@ -142,6 +142,15 @@ public static class Utils
         return new Vector3(_x, _y, _z);
     }
 
+    public static Vector3 RoundToNearestX(this Vector3 n, float x)
+    {
+        float _x = RoundToNearestX(n.x, x);
+        float _y = RoundToNearestX(n.y, x);
+        float _z = RoundToNearestX(n.z, x);
+
+        return new Vector3(_x, _y, _z);
+    }
+
     public static Vector3Int Mod(this Vector3Int n, int x)
     {
         int _x = Mod(n.x, x);

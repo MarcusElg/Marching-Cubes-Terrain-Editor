@@ -19,8 +19,8 @@ public class World : MonoBehaviour
     public bool clearAbove = false;
 
     // Paint
-    public bool paintSingleTriangle = false;
     public Color colour;
+    public bool roundToNearestPoint = true;
     public bool useColourMask = false;
     public Color colourMask;
     public float colourMaskTolerance = 0.01f;
