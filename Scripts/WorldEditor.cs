@@ -89,6 +89,10 @@ public class WorldEditor : Editor
         {
             InspectorRamp();
         }
+        else if (serializedObject.FindProperty("terrainMode").enumValueIndex == 3)
+        {
+            InspectorSmooth();
+        }
         else if (serializedObject.FindProperty("terrainMode").enumValueIndex == 4)
         {
             InspectorPaint();
@@ -173,6 +177,19 @@ public class WorldEditor : Editor
         serializedObject.FindProperty("width").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Width", serializedObject.FindProperty("width").floatValue), 1f, serializedObject.FindProperty("chunkSize").intValue * 0.75f);
 
         if (EditorGUI.EndChangeCheck())
+        {
+            serializedObject.ApplyModifiedPropertiesWithoutUndo();
+        }
+    }
+
+    private void InspectorSmooth()
+    {
+        EditorGUI.BeginChangeCheck();
+        serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 0.1f, serializedObject.FindProperty("chunkSize").intValue * 0.75f * world.transform.lossyScale.x);
+        serializedObject.FindProperty("force").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Force", serializedObject.FindProperty("force").floatValue), 0.1f, 10f);
+        serializedObject.FindProperty("forceOverDistance").animationCurveValue = EditorGUILayout.CurveField("Force Over Distance", serializedObject.FindProperty("forceOverDistance").animationCurveValue);
+
+        if (EditorGUI.EndChangeCheck() == true)
         {
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
         }
@@ -394,6 +411,11 @@ public class WorldEditor : Editor
                                 world.endPosition = raycastHit.point;
                             }
                         }
+                    }
+                    else if (world.terrainMode == World.TerrainMode.Smooth)
+                    {
+                        Handles.color = Color.white;
+                        Handles.DrawWireDisc(raycastHit.point, Vector3.up, world.range);
                     }
                     else if (world.terrainMode == World.TerrainMode.Paint)
                     {
