@@ -28,15 +28,15 @@ public class MarchingCubes
 
     private Vector3 VertexInterpolate(Vector3 p1, Vector3 p2, float v1, float v2)
     {
-        if (Utils.Abs(1 - v1) < 0.000001f)
+        if (Utils.Abs(0.5f - v1) < 0.03f)
         {
             return p1;
         }
-        if (Utils.Abs(1 - v2) < 0.000001f)
+        if (Utils.Abs(0.5f - v2) < 0.03f)
         {
             return p2;
         }
-        if (Utils.Abs(v1 - v2) < 0.000001f)
+        if (Utils.Abs(v1 - v2) < 0.03f)
         {
             return p1;
         }
@@ -106,7 +106,7 @@ public class MarchingCubes
         int cubeIndex = 0;
 
         for (int i = 0; i < 8; i++)
-            if (points[i].density < 1)
+            if (points[i].density < 0.5f)
                 cubeIndex |= 1 << i;
 
         return cubeIndex;

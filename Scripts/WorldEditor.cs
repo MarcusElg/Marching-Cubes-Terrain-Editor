@@ -85,6 +85,10 @@ public class WorldEditor : Editor
         {
             InspectorSet();
         }
+        else if (serializedObject.FindProperty("terrainMode").enumValueIndex == 2)
+        {
+            InspectorRamp();
+        }
         else if (serializedObject.FindProperty("terrainMode").enumValueIndex == 4)
         {
             InspectorPaint();
@@ -158,6 +162,17 @@ public class WorldEditor : Editor
         }
 
         if (EditorGUI.EndChangeCheck() == true)
+        {
+            serializedObject.ApplyModifiedPropertiesWithoutUndo();
+        }
+    }
+
+    private void InspectorRamp()
+    {
+        EditorGUI.BeginChangeCheck();
+        serializedObject.FindProperty("width").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Width", serializedObject.FindProperty("width").floatValue), 1f, serializedObject.FindProperty("chunkSize").intValue * 0.75f);
+
+        if (EditorGUI.EndChangeCheck())
         {
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
         }
@@ -314,7 +329,7 @@ public class WorldEditor : Editor
                 middleButtonDown = false;
             }
         }
-        else if (Event.current.shift == false)
+        else if (Event.current.shift == false || world.terrainMode == World.TerrainMode.Ramp)
         {
             // Brushes
             if (Physics.Raycast(ray, out raycastHit))
@@ -352,6 +367,32 @@ public class WorldEditor : Editor
                         else if (middleButtonDown == true)
                         {
                             world.targetHeight = Mathf.RoundToInt(raycastHit.point.y - raycastHit.transform.position.y);
+                        }
+                    }
+                    else if (world.terrainMode == World.TerrainMode.Ramp)
+                    {
+                        if (world.startPosition != new Vector3(float.MaxValue, float.MaxValue, float.MaxValue) && world.endPosition != new Vector3(float.MaxValue, float.MaxValue, float.MaxValue))
+                        {
+                            Vector3 forward = world.startPosition - world.endPosition;
+                            Vector3 left = new Vector3(-forward.z, 0, forward.x).normalized;
+
+                            Handles.zTest = UnityEngine.Rendering.CompareFunction.Less;
+                            Handles.color = world.settings.FindProperty("rampPreviewColour").colorValue;
+                            Handles.DrawLine(world.startPosition - left * world.width / 2, world.endPosition - left * world.width / 2);
+                            Handles.DrawLine(world.startPosition + left * world.width / 2, world.endPosition + left * world.width / 2);
+                            Handles.zTest = UnityEngine.Rendering.CompareFunction.Disabled;
+                        }
+
+                        if (Event.current.shift == false)
+                        {
+                            if (leftButtonDown == true)
+                            {
+                                world.startPosition = raycastHit.point;
+                            }
+                            else if (rightButtonDown == true)
+                            {
+                                world.endPosition = raycastHit.point;
+                            }
                         }
                     }
                     else if (world.terrainMode == World.TerrainMode.Paint)

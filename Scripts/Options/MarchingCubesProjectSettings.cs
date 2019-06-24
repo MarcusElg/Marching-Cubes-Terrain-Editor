@@ -18,6 +18,7 @@ public class MarchingCubesProjectSettings
                 SerializedObject settings = MarchingCubesSettings.GetSerializedSettings();
                 EditorGUI.BeginChangeCheck();
                 settings.FindProperty("hideNonEditableChildren").boolValue = EditorGUILayout.Toggle("Hide Non-editable Children", settings.FindProperty("hideNonEditableChildren").boolValue);
+                settings.FindProperty("rampPreviewColour").colorValue = EditorGUILayout.ColorField("Ramp Preview Colour", settings.FindProperty("rampPreviewColour").colorValue);
 
                 if (EditorGUI.EndChangeCheck() == true)
                 {

@@ -12,6 +12,11 @@ public class World : MonoBehaviour
     // Set
     public int targetHeight = 10;
 
+    // Ramp
+    public Vector3 startPosition =  new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+    public Vector3 endPosition = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+    public float width;
+
     // Paint
     public bool paintSingleTriangle = false;
     public Color colour;

@@ -7,6 +7,7 @@ using UnityEngine;
 public class MarchingCubesSettings : ScriptableObject
 {
     public bool hideNonEditableChildren = true;
+    public Color rampPreviewColour = Color.white;
 
     public static MarchingCubesSettings GetOrCreateSettings()
     {
