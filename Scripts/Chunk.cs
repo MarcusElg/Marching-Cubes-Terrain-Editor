@@ -42,7 +42,7 @@ public class Chunk : MonoBehaviour
             {
                 for (int z = 0; z < world.chunkSize + 1; z++)
                 {
-                    points[x + (world.chunkSize + 1) * (y + z * (world.chunkSize + 1))] = new Point(new Vector3Int(x, y, z), _densityGenerator.CalculateDensity(world, world.transform.lossyScale.x * x + transform.position.x, world.transform.lossyScale.x * y + transform.position.y, world.transform.lossyScale.x * z + transform.position.z), Random.ColorHSV());
+                    points[x + (world.chunkSize + 1) * (y + z * (world.chunkSize + 1))] = new Point(new Vector3Int(x, y, z), _densityGenerator.CalculateDensity(world, world.transform.lossyScale.x * x + transform.position.x, world.transform.lossyScale.x * y + transform.position.y, world.transform.lossyScale.x * z + transform.position.z), Color.green);
                 }
             }
         }

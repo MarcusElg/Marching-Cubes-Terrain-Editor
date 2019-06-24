@@ -133,7 +133,7 @@ public class WorldEditor : Editor
         EditorGUI.BeginChangeCheck();
         serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 0.1f, serializedObject.FindProperty("chunkSize").intValue * 0.75f * world.transform.lossyScale.x);
         serializedObject.FindProperty("forceOverDistance").animationCurveValue = EditorGUILayout.CurveField("Force Over Distance", serializedObject.FindProperty("forceOverDistance").animationCurveValue);
-        serializedObject.FindProperty("targetHeight").intValue = Mathf.Clamp(EditorGUILayout.IntField("Target Height", serializedObject.FindProperty("targetHeight").intValue), 0, serializedObject.FindProperty("chunkSize").intValue);
+        serializedObject.FindProperty("targetHeight").intValue = Mathf.Clamp(EditorGUILayout.IntField("Target Height", serializedObject.FindProperty("targetHeight").intValue), 1, serializedObject.FindProperty("chunkSize").intValue);
 
         if (GUILayout.Button("Set All") == true)
         {
@@ -143,7 +143,7 @@ public class WorldEditor : Editor
                 {
                     float y = world.transform.GetChild(i).GetComponent<Chunk>().points[j].localPosition.y + world.transform.GetChild(i).localPosition.y;
 
-                    if (y > world.targetHeight)
+                    if (y >= world.targetHeight)
                     {
                         world.transform.GetChild(i).GetComponent<Chunk>().points[j].density = 1;
                     }

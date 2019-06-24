@@ -41,7 +41,7 @@ public class MarchingCubes
             return p1;
         }
 
-        float mu = (1 - v1) / (v2 - v1);
+        float mu = (0.5f - v1) / (v2 - v1);
 
         Vector3 p = p1 + mu * (p2 - p1);
 

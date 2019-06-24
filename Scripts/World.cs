@@ -135,7 +135,7 @@ public class World : MonoBehaviour
         }
         else
         {
-            return new Point(new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue), 0, Random.ColorHSV());
+            return new Point(new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue), 0, Color.green);
         }
     }
 
