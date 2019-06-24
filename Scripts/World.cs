@@ -16,6 +16,7 @@ public class World : MonoBehaviour
     public Vector3 startPosition =  new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
     public Vector3 endPosition = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
     public bool flatFloor = false;
+    public bool clearAbove = false;
 
     // Paint
     public bool paintSingleTriangle = false;

@@ -198,25 +198,50 @@ public static class TerrainEditor
                 startY = 0;
             }
 
+            int endY = world.range;
+            if (world.clearAbove == true)
+            {
+                endY = 0;
+            }
+
             for (int x = -world.range; x <= world.range; x++)
             {
-                for (int y = startY; y <= world.range; y++)
+                for (int y = startY; y <= endY; y++)
                 {
                     Vector3 offsetPosition = position + left * x + Vector3.up * y;
                     Chunk chunk = world.GetChunk(new Vector3(offsetPosition.x, (offsetPosition.y - world.transform.position.y).CeilToNearestX(world.chunkSize * world.transform.lossyScale.x) + world.transform.position.y, offsetPosition.z));
 
-                    if (!chunksToUpdate.Contains(chunk))
+                    if (chunk != null)
                     {
-                        chunksToUpdate.Add(chunk);
-                    }
+                        if (!chunksToUpdate.Contains(chunk))
+                        {
+                            chunksToUpdate.Add(chunk);
+                        }
 
-                    float distanceToCenter = Vector3.Distance(position + new Vector3(x, y, 0), position);
-                    if (!(distanceToCenter <= world.range))
+                        float distanceToCenter = Vector3.Distance(position + new Vector3(x, y, 0), position);
+                        if (!(distanceToCenter <= world.range))
+                        {
+                            continue;
+                        }
+
+                        chunk.SetDensity(world, 1, (offsetPosition - chunk.transform.position) / world.transform.lossyScale.x);
+                    }
+                }
+
+                if (world.clearAbove == true)
+                {
+                    Vector3 offsetPosition = position + left * x;
+                    Chunk chunk = world.GetChunk(new Vector3(offsetPosition.x, (offsetPosition.y - world.transform.position.y).CeilToNearestX(world.chunkSize * world.transform.lossyScale.x) + world.transform.position.y, offsetPosition.z));
+
+                    if (chunk != null)
                     {
-                        continue;
+                        for (int y = Mathf.RoundToInt((position.y - chunk.transform.position.y) / world.transform.lossyScale.x); y <= world.chunkSize; y++)
+                        {
+                            Vector3 localPosition = (offsetPosition - chunk.transform.position) / world.transform.lossyScale.x;
+                            localPosition.y = y;
+                            chunk.SetDensity(world, 1, localPosition);
+                        }
                     }
-
-                    chunk.SetDensity(world, 1, (offsetPosition - chunk.transform.position) / world.transform.lossyScale.x);
                 }
             }
         }

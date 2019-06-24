@@ -179,6 +179,7 @@ public class WorldEditor : Editor
         EditorGUI.BeginChangeCheck();
         serializedObject.FindProperty("range").intValue = Mathf.Clamp(EditorGUILayout.IntField("Range", serializedObject.FindProperty("range").intValue), 1, Mathf.RoundToInt(serializedObject.FindProperty("chunkSize").intValue * 0.75f * world.transform.lossyScale.x));
         serializedObject.FindProperty("flatFloor").boolValue = EditorGUILayout.Toggle("Flat Floor", serializedObject.FindProperty("flatFloor").boolValue);
+        serializedObject.FindProperty("clearAbove").boolValue = EditorGUILayout.Toggle("Clear Above", serializedObject.FindProperty("clearAbove").boolValue);
 
         if (GUILayout.Button("Create Space In Line"))
         {
@@ -401,7 +402,7 @@ public class WorldEditor : Editor
                             Vector3 left = new Vector3(-forward.z, 0, forward.x).normalized;
 
                             Handles.zTest = UnityEngine.Rendering.CompareFunction.Less;
-                            Handles.color = world.settings.FindProperty("rampPreviewColour").colorValue;
+                            Handles.color = world.settings.FindProperty("linePreviewColour").colorValue;
                             Handles.DrawLine(world.startPosition - left * world.range, world.endPosition - left * world.range / 2);
                             Handles.DrawLine(world.startPosition + left * world.range, world.endPosition + left * world.range / 2);
                             Handles.zTest = UnityEngine.Rendering.CompareFunction.Disabled;
