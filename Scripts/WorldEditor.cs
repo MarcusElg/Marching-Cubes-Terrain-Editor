@@ -349,7 +349,8 @@ public class WorldEditor : Editor
                 middleButtonDown = false;
             }
         }
-        else if (Event.current.shift == false || world.terrainMode == World.TerrainMode.Line)
+
+        if ((Event.current.shift == false || world.terrainMode == World.TerrainMode.Line))
         {
             // Brushes
             if (Physics.Raycast(ray, out raycastHit))
@@ -363,7 +364,7 @@ public class WorldEditor : Editor
                         Handles.color = Color.white;
                         Handles.DrawWireDisc(raycastHit.point, raycastHit.normal, world.range);
 
-                        if (leftButtonDown == true || rightButtonDown == true)
+                        if ((leftButtonDown == true || rightButtonDown == true) && (Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag))
                         {
                             bool raise = true;
 
@@ -380,7 +381,7 @@ public class WorldEditor : Editor
                         Handles.color = Color.white;
                         Handles.DrawWireDisc(raycastHit.point, Vector3.up, world.range);
 
-                        if (leftButtonDown == true)
+                        if (leftButtonDown == true && (Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag))
                         {
                             TerrainEditor.SetTerrain(world, raycastHit.point);
                         }
@@ -425,7 +426,7 @@ public class WorldEditor : Editor
                         Handles.color = Color.white;
                         Handles.DrawWireDisc(raycastHit.point, raycastHit.normal, world.range);
 
-                        if (leftButtonDown == true)
+                        if (leftButtonDown == true && (Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag))
                         {
                             TerrainEditor.PaintTerrain(world, raycastHit.point);
                         }
@@ -442,10 +443,10 @@ public class WorldEditor : Editor
                         }
                     }
                 }
-
-                SceneView.currentDrawingSceneView.Repaint();
             }
         }
+
+        SceneView.currentDrawingSceneView.Repaint();
     }
 
     private void ResetTerrain()
