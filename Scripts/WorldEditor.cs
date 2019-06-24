@@ -50,20 +50,24 @@ public class WorldEditor : Editor
         {
             serializedObject.FindProperty("terrainMode").enumValueIndex = 1;
         }
-        if (GUILayout.Button("Smooth"))
+        else if (GUILayout.Button("Ramp"))
         {
             serializedObject.FindProperty("terrainMode").enumValueIndex = 2;
         }
         GUILayout.EndHorizontal();
 
         GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Paint"))
+        if (GUILayout.Button("Smooth"))
         {
             serializedObject.FindProperty("terrainMode").enumValueIndex = 3;
         }
-        else if (GUILayout.Button("Options"))
+        else if (GUILayout.Button("Paint"))
         {
             serializedObject.FindProperty("terrainMode").enumValueIndex = 4;
+        }
+        else if (GUILayout.Button("Options"))
+        {
+            serializedObject.FindProperty("terrainMode").enumValueIndex = 5;
         }
 
         GUILayout.EndHorizontal();
@@ -81,11 +85,11 @@ public class WorldEditor : Editor
         {
             InspectorSet();
         }
-        else if (serializedObject.FindProperty("terrainMode").enumValueIndex == 3)
+        else if (serializedObject.FindProperty("terrainMode").enumValueIndex == 4)
         {
             InspectorPaint();
         }
-        else if (serializedObject.FindProperty("terrainMode").enumValueIndex == 4)
+        else if (serializedObject.FindProperty("terrainMode").enumValueIndex == 5)
         {
             InspectorOptions();
         }
