@@ -236,9 +236,9 @@ public static class TerrainEditor
     public static void SmoothTerrain(World world, Vector3 point, Vector3 up)
     {
         List<Chunk> chunksToUpdate = new List<Chunk>();
-        float[,] densities = new float[world.range * 2 + 2, world.range * 2 + 2];
-        Chunk[,] chunks = new Chunk[world.range * 2 + 2, world.range * 2 + 2];
-        Point[,] points = new Point[world.range * 2 + 2, world.range * 2 + 2];
+        float[,,] densities = new float[world.range * 2 + 2, 3, world.range * 2 + 2];
+        Chunk[,,] chunks = new Chunk[world.range * 2 + 2, 3, world.range * 2 + 2];
+        Point[,,] points = new Point[world.range * 2 + 2, 3, world.range * 2 + 2];
 
         Vector3 left = new Vector3(-up.z, up.y, up.x).normalized;
         Vector3 forward = new Vector3(left.x, left.y, -left.z).normalized;
@@ -246,25 +246,28 @@ public static class TerrainEditor
         // Add densities
         for (int x = -world.range - 1; x <= world.range; x++)
         {
-            for (int z = -world.range - 1; z <= world.range; z++)
+            for (int y = -1; y <= 1; y++)
             {
-                Chunk chunk = world.GetChunk(new Vector3(point.x, point.y, point.z) + x * left + z * forward);
-
-                if (chunk != null)
+                for (int z = -world.range - 1; z <= world.range; z++)
                 {
-                    if (!chunksToUpdate.Contains(chunk))
+                    Chunk chunk = world.GetChunk(new Vector3(point.x, point.y, point.z) + x * left + y * up + z * forward);
+
+                    if (chunk != null)
                     {
-                        chunksToUpdate.Add(chunk);
-                    }
+                        if (!chunksToUpdate.Contains(chunk))
+                        {
+                            chunksToUpdate.Add(chunk);
+                        }
 
-                    Vector3 localPosition = (new Vector3(point.x, point.y, point.z) + x * left + z * forward - chunk.transform.position) / world.transform.lossyScale.x;
-                    densities[x + world.range + 1, z + world.range + 1] = chunk.GetPoint(world, localPosition).density;
-                    chunks[x + world.range + 1, z + world.range + 1] = chunk;
-                    points[x + world.range + 1, z + world.range + 1] = chunk.GetPoint(world, localPosition);
-                }
-                else
-                {
-                    densities[x + world.range + 1, z + world.range + 1] = float.MaxValue;
+                        Vector3 localPosition = (new Vector3(point.x, point.y, point.z) + x * left + y * up + z * forward - chunk.transform.position) / world.transform.lossyScale.x;
+                        densities[x + world.range + 1, y + 1, z + world.range + 1] = chunk.GetPoint(world, localPosition).density;
+                        chunks[x + world.range + 1, y + 1, z + world.range + 1] = chunk;
+                        points[x + world.range + 1, y + 1, z + world.range + 1] = chunk.GetPoint(world, localPosition);
+                    }
+                    else
+                    {
+                        densities[x + world.range + 1, y + 1, z + world.range + 1] = float.MaxValue;
+                    }
                 }
             }
         }
@@ -274,34 +277,16 @@ public static class TerrainEditor
         {
             for (int z = 1; z < densities.GetLength(1) - 1; z++)
             {
-                if (chunks[x, z] != null)
+                if (chunks[x, 1, z] != null)
                 {
-                    List<float> nonNullDensities = new List<float>();
-                    nonNullDensities.Add(densities[x + 1, z]);
-                    nonNullDensities.Add(densities[x, z + 1]);
-                    nonNullDensities.Add(densities[x - 1, z]);
-                    nonNullDensities.Add(densities[x, z - 1]);
-                    nonNullDensities.Add(densities[x + 1, z + 1]);
-                    nonNullDensities.Add(densities[x - 1, z - 1]);
-                    nonNullDensities.Add(densities[x - 1, z + 1]);
-                    nonNullDensities.Add(densities[x + 1, z - 1]);
-
                     float totalDensity = 0;
+                    int amountOfDensities = 0;
+                    AddNeighboringPoints(ref totalDensity, ref amountOfDensities, densities, x, 0, z);
+                    AddNeighboringPoints(ref totalDensity, ref amountOfDensities, densities, x, 1, z);
+                    AddNeighboringPoints(ref totalDensity, ref amountOfDensities, densities, x, 2, z);
 
-                    for (int i = 0; i < nonNullDensities.Count; i++)
-                    {
-                        if (nonNullDensities[i] == float.MaxValue)
-                        {
-                            nonNullDensities.RemoveAt(i);
-                        }
-                        else
-                        {
-                            totalDensity += nonNullDensities[i];
-                        }
-                    }
-
-                    float averageDensity = totalDensity / nonNullDensities.Count;
-                    chunks[x, z].SetDensity(world, Mathf.Lerp(points[x, z].density, averageDensity, world.force), points[x, z].localPosition);
+                    float averageDensity = totalDensity / amountOfDensities;
+                    chunks[x, 1, z].SetDensity(world, Mathf.Lerp(points[x, 1, z].density, averageDensity, world.force), points[x, 1, z].localPosition);
                 }
             }
         }
@@ -309,6 +294,27 @@ public static class TerrainEditor
         for (int i = 0; i < chunksToUpdate.Count; i++)
         {
             chunksToUpdate[i].Generate(world);
+        }
+    }
+
+    private static void AddNeighboringPoints(ref float totalDensity, ref int amountOfDensities, float[,,] densities, int x, int y, int z)
+    {
+        AddNeighboringPoint(ref totalDensity, ref amountOfDensities, densities[x + 1, y, z]);
+        AddNeighboringPoint(ref totalDensity, ref amountOfDensities, densities[x, y, z + 1]);
+        AddNeighboringPoint(ref totalDensity, ref amountOfDensities, densities[x - 1, y, z]);
+        AddNeighboringPoint(ref totalDensity, ref amountOfDensities, densities[x, y, z - 1]);
+        AddNeighboringPoint(ref totalDensity, ref amountOfDensities, densities[x + 1, y, z + 1]);
+        AddNeighboringPoint(ref totalDensity, ref amountOfDensities, densities[x - 1, y, z - 1]);
+        AddNeighboringPoint(ref totalDensity, ref amountOfDensities, densities[x - 1, y, z + 1]);
+        AddNeighboringPoint(ref totalDensity, ref amountOfDensities, densities[x + 1, y, z - 1]);
+    }
+
+    private static void AddNeighboringPoint(ref float totalDensity, ref int amountOfDensities, float density)
+    {
+        if (density != float.MaxValue)
+        {
+            totalDensity += density;
+            amountOfDensities += 1;
         }
     }
 

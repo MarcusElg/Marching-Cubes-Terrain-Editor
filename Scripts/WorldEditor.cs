@@ -419,7 +419,7 @@ public class WorldEditor : Editor
 
                         if (leftButtonDown == true)
                         {
-                            TerrainEditor.SmoothTerrain(world, raycastHit.point, raycastHit.normal);
+                            TerrainEditor.SmoothTerrain(world, raycastHit.point, raycastHit.normal.normalized);
                         }
                     }
                     else if (world.terrainMode == World.TerrainMode.Paint)
