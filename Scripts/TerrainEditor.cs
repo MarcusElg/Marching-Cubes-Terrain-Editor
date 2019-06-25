@@ -160,23 +160,26 @@ public static class TerrainEditor
                         {
                             chunk2 = world.GetChunk(offsetedX, y * world.transform.lossyScale.x, offsetedZ);
 
-                            if (!chunksToUpdate.Contains(chunk2))
+                            if (chunk2 != null && !chunksToUpdate.Contains(chunk2))
                             {
                                 chunksToUpdate.Add(chunk2);
                             }
                         }
 
-                        if (y >= world.targetHeight)
+                        if (chunk2 != null)
                         {
-                            Vector3 position = (new Vector3(offsetedX, 0, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x;
-                            position.y = y - chunk2.transform.localPosition.y;
-                            chunk2.SetDensity(world, 1, position);
-                        }
-                        else
-                        {
-                            Vector3 position = (new Vector3(offsetedX, 0, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x;
-                            position.y = y - chunk2.transform.localPosition.y;
-                            chunk2.SetDensity(world, 0, position);
+                            if (y >= world.targetHeight)
+                            {
+                                Vector3 position = (new Vector3(offsetedX, 0, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x;
+                                position.y = y - chunk2.transform.localPosition.y;
+                                chunk2.SetDensity(world, 1, position);
+                            }
+                            else
+                            {
+                                Vector3 position = (new Vector3(offsetedX, 0, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x;
+                                position.y = y - chunk2.transform.localPosition.y;
+                                chunk2.SetDensity(world, 0, position);
+                            }
                         }
                     }
                 }
@@ -205,13 +208,13 @@ public static class TerrainEditor
             Vector3 position = Vector3.Lerp(world.startPosition, world.endPosition, f);
 
             int startY = -world.range;
-            if (world.flatFloor == true)
+            if (world.flatFloor == true && world.addTerrain == false)
             {
                 startY = 0;
             }
 
             int endY = world.range;
-            if (world.clearAbove == true)
+            if (world.clearAbove == true && world.addTerrain == false)
             {
                 endY = 0;
             }
@@ -236,11 +239,18 @@ public static class TerrainEditor
                             continue;
                         }
 
-                        chunk.SetDensity(world, 1, (offsetPosition - chunk.transform.position) / world.transform.lossyScale.x);
+                        if (world.addTerrain == true)
+                        {
+                            chunk.SetDensity(world, 0, (offsetPosition - chunk.transform.position) / world.transform.lossyScale.x);
+                        }
+                        else
+                        {
+                            chunk.SetDensity(world, 1, (offsetPosition - chunk.transform.position) / world.transform.lossyScale.x);
+                        }
                     }
                 }
 
-                if (world.clearAbove == true)
+                if (world.clearAbove == true && world.addTerrain == false)
                 {
                     Vector3 offsetPosition = position + left * x;
                     Chunk chunk = world.GetChunk(new Vector3(offsetPosition.x, offsetPosition.y, offsetPosition.z));

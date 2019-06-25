@@ -12,9 +12,10 @@ public class World : MonoBehaviour
     // Set
     public int targetHeight = 10;
 
-    // Ramp
+    // Line
     public Vector3 startPosition = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
     public Vector3 endPosition = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+    public bool addTerrain = false;
     public bool flatFloor = false;
     public bool clearAbove = false;
 

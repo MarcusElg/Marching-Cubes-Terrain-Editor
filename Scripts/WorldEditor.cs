@@ -178,10 +178,15 @@ public class WorldEditor : Editor
     {
         EditorGUI.BeginChangeCheck();
         serializedObject.FindProperty("range").intValue = Mathf.Clamp(EditorGUILayout.IntField("Range", serializedObject.FindProperty("range").intValue), 1, Mathf.RoundToInt(serializedObject.FindProperty("chunkSize").intValue * 0.375f * world.transform.lossyScale.x));
-        serializedObject.FindProperty("flatFloor").boolValue = EditorGUILayout.Toggle("Flat Floor", serializedObject.FindProperty("flatFloor").boolValue);
-        serializedObject.FindProperty("clearAbove").boolValue = EditorGUILayout.Toggle("Clear Above", serializedObject.FindProperty("clearAbove").boolValue);
+        serializedObject.FindProperty("addTerrain").boolValue = EditorGUILayout.Toggle("Add Terrain", serializedObject.FindProperty("addTerrain").boolValue);
 
-        if (GUILayout.Button("Create Space In Line"))
+        if (serializedObject.FindProperty("addTerrain").boolValue == false)
+        {
+            serializedObject.FindProperty("flatFloor").boolValue = EditorGUILayout.Toggle("Flat Floor", serializedObject.FindProperty("flatFloor").boolValue);
+            serializedObject.FindProperty("clearAbove").boolValue = EditorGUILayout.Toggle("Clear Above", serializedObject.FindProperty("clearAbove").boolValue);
+        }
+
+        if (GUILayout.Button("Modify On Line"))
         {
             TerrainEditor.LineTerrain(world);
         }
