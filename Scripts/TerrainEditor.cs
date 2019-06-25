@@ -233,19 +233,22 @@ public static class TerrainEditor
         }
     }
 
-    public static void SmoothTerrain(World world, Vector3 point)
+    public static void SmoothTerrain(World world, Vector3 point, Vector3 up)
     {
         List<Chunk> chunksToUpdate = new List<Chunk>();
         float[,] densities = new float[world.range * 2 + 2, world.range * 2 + 2];
         Chunk[,] chunks = new Chunk[world.range * 2 + 2, world.range * 2 + 2];
         Point[,] points = new Point[world.range * 2 + 2, world.range * 2 + 2];
 
+        Vector3 left = new Vector3(-up.z, up.y, up.x).normalized;
+        Vector3 forward = new Vector3(left.x, left.y, -left.z).normalized;
+
         // Add densities
         for (int x = -world.range - 1; x <= world.range; x++)
         {
             for (int z = -world.range - 1; z <= world.range; z++)
             {
-                Chunk chunk = world.GetChunk(point.x + x, point.y, point.z + z);
+                Chunk chunk = world.GetChunk(new Vector3(point.x, point.y, point.z) + x * left + z * forward);
 
                 if (chunk != null)
                 {
@@ -254,9 +257,10 @@ public static class TerrainEditor
                         chunksToUpdate.Add(chunk);
                     }
 
-                    densities[x + world.range + 1, z + world.range + 1] = chunk.GetPoint(world, (new Vector3(point.x + x, point.y, point.z + z) - chunk.transform.position) / world.transform.lossyScale.x).density;
+                    Vector3 localPosition = (new Vector3(point.x, point.y, point.z) + x * left + z * forward - chunk.transform.position) / world.transform.lossyScale.x;
+                    densities[x + world.range + 1, z + world.range + 1] = chunk.GetPoint(world, localPosition).density;
                     chunks[x + world.range + 1, z + world.range + 1] = chunk;
-                    points[x + world.range + 1, z + world.range + 1] = chunk.GetPoint(world, (new Vector3(point.x + x, point.y, point.z + z) - chunk.transform.position) / world.transform.lossyScale.x);
+                    points[x + world.range + 1, z + world.range + 1] = chunk.GetPoint(world, localPosition);
                 }
                 else
                 {

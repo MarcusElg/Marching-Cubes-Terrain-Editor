@@ -415,11 +415,11 @@ public class WorldEditor : Editor
                     else if (world.terrainMode == World.TerrainMode.Smooth)
                     {
                         Handles.color = Color.white;
-                        Handles.DrawWireDisc(raycastHit.point, Vector3.up, world.range);
+                        Handles.DrawWireDisc(raycastHit.point, raycastHit.normal, world.range);
 
                         if (leftButtonDown == true)
                         {
-                            TerrainEditor.SmoothTerrain(world, raycastHit.point);
+                            TerrainEditor.SmoothTerrain(world, raycastHit.point, raycastHit.normal);
                         }
                     }
                     else if (world.terrainMode == World.TerrainMode.Paint)
