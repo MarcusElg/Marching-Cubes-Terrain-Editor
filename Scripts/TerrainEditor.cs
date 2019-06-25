@@ -158,17 +158,24 @@ public static class TerrainEditor
                     {
                         if (y > world.chunkSize)
                         {
-                            chunk2 = world.GetChunk(offsetedX, y, offsetedZ);
+                            chunk2 = world.GetChunk(offsetedX, y * world.transform.lossyScale.x, offsetedZ);
+
+                            if (!chunksToUpdate.Contains(chunk2))
+                            {
+                                chunksToUpdate.Add(chunk2);
+                            }
                         }
 
-                        if (y + chunk2.transform.localPosition.y >= world.targetHeight)
+                        if (y >= world.targetHeight)
                         {
-                            Vector3 position = (new Vector3(offsetedX, chunk2.transform.position.y, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x + new Vector3(0, y, 0);
+                            Vector3 position = (new Vector3(offsetedX, 0, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x;
+                            position.y = y - chunk2.transform.localPosition.y;
                             chunk2.SetDensity(world, 1, position);
                         }
                         else
                         {
-                            Vector3 position = (new Vector3(offsetedX, chunk2.transform.position.y, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x + new Vector3(0, y, 0);
+                            Vector3 position = (new Vector3(offsetedX, 0, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x;
+                            position.y = y - chunk2.transform.localPosition.y;
                             chunk2.SetDensity(world, 0, position);
                         }
                     }
