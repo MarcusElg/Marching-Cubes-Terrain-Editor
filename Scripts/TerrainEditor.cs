@@ -128,6 +128,11 @@ public static class TerrainEditor
 
                     if (chunk != null)
                     {
+                        if (!chunksToUpdate.Contains(chunk))
+                        {
+                            chunksToUpdate.Add(chunk);
+                        }
+
                         if (y >= world.targetHeight)
                         {
                             Vector3 position = (new Vector3(offsetedX, 0, offsetedZ) - chunk.transform.position) / world.transform.lossyScale.x;
