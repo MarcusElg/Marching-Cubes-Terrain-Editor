@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: MarchingCubesSettings
   m_EditorClassIdentifier: 
   hideNonEditableChildren: 0
+  linePreviewColour: {r: 1, g: 1, b: 1, a: 1}

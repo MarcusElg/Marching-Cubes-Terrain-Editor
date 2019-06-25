@@ -14,11 +14,11 @@ public static class TerrainEditor
         Vector3 hitPos = new Vector3(hitX, hitY, hitZ);
 
         // Dertermine what chunks to update
-        Chunk centerChunk = world.GetChunk(point + new Vector3(0, 10, 0));
-        Chunk topLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 10, world.range + 0.1f));
-        Chunk topRightChunk = world.GetChunk(point + new Vector3(world.range + 0.1f, 10, world.range + 0.1f));
-        Chunk bottomLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 10, -world.range - 0.1f));
-        Chunk bottomRightChunk = world.GetChunk(point + new Vector3(world.range + 0.1f, 10, -world.range - 0.1f));
+        Chunk centerChunk = world.GetChunk(point);
+        Chunk topLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 0, world.range + 0.1f));
+        Chunk topRightChunk = world.GetChunk(point + new Vector3(world.range + 0.1f, 0, world.range + 0.1f));
+        Chunk bottomLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 0, -world.range - 0.1f));
+        Chunk bottomRightChunk = world.GetChunk(point + new Vector3(world.range + 0.1f, 0, -world.range - 0.1f));
 
         for (int x = -world.range; x <= world.range; x++)
         {
@@ -37,7 +37,7 @@ public static class TerrainEditor
                     }
 
                     float modificationAmount = world.force / distance * world.forceOverDistance.Evaluate(1 - distance.Map(0, world.force, 0, 1)) * buildModifier;
-                    Chunk chunk2 = world.GetChunk(offsetedX, offsetedY + 1, offsetedZ);
+                    Chunk chunk2 = world.GetChunk(offsetedX, offsetedY, offsetedZ);
 
                     if (chunk2 != null)
                     {
@@ -54,7 +54,7 @@ public static class TerrainEditor
                         {
                             if (Mathf.RoundToInt(point2.x) == 0)
                             {
-                                Chunk borderChunk = world.GetChunk(offsetedX - 1, offsetedY + 1, offsetedZ);
+                                Chunk borderChunk = world.GetChunk(offsetedX - 1, offsetedY, offsetedZ);
 
                                 if (borderChunk != null)
                                 {
@@ -64,7 +64,7 @@ public static class TerrainEditor
 
                             if (Mathf.RoundToInt(point2.z) == 0)
                             {
-                                Chunk borderChunk = world.GetChunk(offsetedX, offsetedY + 1, offsetedZ - 1);
+                                Chunk borderChunk = world.GetChunk(offsetedX, offsetedY, offsetedZ - 1);
 
                                 if (borderChunk != null)
                                 {
@@ -113,25 +113,25 @@ public static class TerrainEditor
         List<Chunk> chunksToUpdate = new List<Chunk>();
 
         // Dertermine what chunks to update
-        Chunk chunk = world.GetChunk(hitPos + new Vector3(world.range, 1, world.range));
+        Chunk chunk = world.GetChunk(hitPos + new Vector3(world.range, 0, world.range));
         if (chunk != null && !chunksToUpdate.Contains(chunk))
         {
             chunksToUpdate.Add(chunk);
         }
 
-        chunk = world.GetChunk(hitPos + new Vector3(world.range, 1, -world.range));
+        chunk = world.GetChunk(hitPos + new Vector3(world.range, 0, -world.range));
         if (chunk != null && !chunksToUpdate.Contains(chunk))
         {
             chunksToUpdate.Add(chunk);
         }
 
-        chunk = world.GetChunk(hitPos + new Vector3(-world.range, 1, world.range));
+        chunk = world.GetChunk(hitPos + new Vector3(-world.range, 0, world.range));
         if (chunk != null && !chunksToUpdate.Contains(chunk))
         {
             chunksToUpdate.Add(chunk);
         }
 
-        chunk = world.GetChunk(hitPos + new Vector3(-world.range, 1, -world.range));
+        chunk = world.GetChunk(hitPos + new Vector3(-world.range, 0, -world.range));
         if (chunk != null && !chunksToUpdate.Contains(chunk))
         {
             chunksToUpdate.Add(chunk);
@@ -150,12 +150,17 @@ public static class TerrainEditor
                     continue;
                 }
 
-                Chunk chunk2 = world.GetChunk(offsetedX, hitY + 1, offsetedZ);
+                Chunk chunk2 = world.GetChunk(offsetedX, hitY, offsetedZ);
 
                 if (chunk2 != null)
                 {
-                    for (int y = 0; y <= world.chunkSize; y++)
+                    for (int y = 0; y <= world.chunkSize * world.maxHeightIndex; y++)
                     {
+                        if (y > world.chunkSize)
+                        {
+                            chunk2 = world.GetChunk(offsetedX, y, offsetedZ);
+                        }
+
                         if (y + chunk2.transform.localPosition.y >= world.targetHeight)
                         {
                             Vector3 position = (new Vector3(offsetedX, chunk2.transform.position.y, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x + new Vector3(0, y, 0);
@@ -209,7 +214,7 @@ public static class TerrainEditor
                 for (int y = startY; y <= endY; y++)
                 {
                     Vector3 offsetPosition = position + left * x + Vector3.up * y;
-                    Chunk chunk = world.GetChunk(new Vector3(offsetPosition.x, (offsetPosition.y - world.transform.position.y).CeilToNearestX(world.chunkSize * world.transform.lossyScale.x) + world.transform.position.y, offsetPosition.z));
+                    Chunk chunk = world.GetChunk(new Vector3(offsetPosition.x, offsetPosition.y, offsetPosition.z));
 
                     if (chunk != null)
                     {
@@ -231,7 +236,7 @@ public static class TerrainEditor
                 if (world.clearAbove == true)
                 {
                     Vector3 offsetPosition = position + left * x;
-                    Chunk chunk = world.GetChunk(new Vector3(offsetPosition.x, (offsetPosition.y - world.transform.position.y).CeilToNearestX(world.chunkSize * world.transform.lossyScale.x) + world.transform.position.y, offsetPosition.z));
+                    Chunk chunk = world.GetChunk(new Vector3(offsetPosition.x, offsetPosition.y, offsetPosition.z));
 
                     if (chunk != null)
                     {
@@ -260,11 +265,11 @@ public static class TerrainEditor
         }
 
         // Dertermine what chunks to update
-        Chunk centerChunk = world.GetChunk(point + new Vector3(0, 10, 0));
-        Chunk topLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 10, world.range + 0.1f));
-        Chunk topRightChunk = world.GetChunk(point + new Vector3(world.range + 0.1f, 10, world.range + 0.1f));
-        Chunk bottomLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 10, -world.range - 0.1f));
-        Chunk bottomRightChunk = world.GetChunk(point + new Vector3(world.range + 0.1f, 10, -world.range - 0.1f));
+        Chunk centerChunk = world.GetChunk(point);
+        Chunk topLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 0, world.range + 0.1f));
+        Chunk topRightChunk = world.GetChunk(point + new Vector3(world.range + 0.1f, 0, world.range + 0.1f));
+        Chunk bottomLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 0, -world.range - 0.1f));
+        Chunk bottomRightChunk = world.GetChunk(point + new Vector3(world.range + 0.1f, 0, -world.range - 0.1f));
 
         for (int x = -world.range; x <= world.range; x++)
         {
@@ -282,7 +287,7 @@ public static class TerrainEditor
                         continue;
                     }
 
-                    Chunk chunk2 = world.GetChunk(offsetedX, offsetedY + 1, offsetedZ);
+                    Chunk chunk2 = world.GetChunk(offsetedX, offsetedY, offsetedZ);
 
                     if (chunk2 != null)
                     {

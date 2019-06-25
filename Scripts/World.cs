@@ -13,7 +13,7 @@ public class World : MonoBehaviour
     public int targetHeight = 10;
 
     // Ramp
-    public Vector3 startPosition =  new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+    public Vector3 startPosition = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
     public Vector3 endPosition = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
     public bool flatFloor = false;
     public bool clearAbove = false;
@@ -26,6 +26,7 @@ public class World : MonoBehaviour
     public float colourMaskTolerance = 0.01f;
 
     public int chunkSize = 8;
+    public int maxHeightIndex = 1;
     public float groundHeight = 10;
 
     public bool randomizeSeed = true;
@@ -55,6 +56,11 @@ public class World : MonoBehaviour
 
     public void AddChunks(Vector3Int startIndex, Vector3Int endIndex)
     {
+        if (endIndex.y + 1 > maxHeightIndex)
+        {
+            maxHeightIndex = endIndex.y + 1;
+        }
+
         for (int x = startIndex.x; x < endIndex.x + 1; x++)
         {
             for (int y = startIndex.y; y < endIndex.y + 1; y++)
@@ -75,15 +81,18 @@ public class World : MonoBehaviour
             {
                 for (int z = startIndex.z; z < endIndex.z + 1; z++)
                 {
-                    for (int i = 0; i < transform.childCount; i++)
+                    Chunk chunk = GetChunk(transform.position + new Vector3(x * chunkSize * transform.lossyScale.x + chunkSize * transform.lossyScale.x * 0.5f, y * chunkSize * transform.lossyScale.y + chunkSize * transform.lossyScale.y * 0.5f, z * chunkSize * transform.lossyScale.z + chunkSize * transform.lossyScale.z * 0.5f));
+                    if (chunk != null)
                     {
-                        if (transform.GetChild(i).GetComponent<Chunk>().chunkIndex == new Vector3(x, y, z))
-                        {
-                            DestroyImmediate(transform.GetChild(i).gameObject);
-                        }
+                        DestroyImmediate(chunk.gameObject);
                     }
                 }
             }
+        }
+
+        if (transform.childCount == 0)
+        {
+            AddChunks(Vector3Int.zero, Vector3Int.zero);
         }
     }
 
@@ -102,14 +111,10 @@ public class World : MonoBehaviour
 
     public Chunk GetChunk(float x, float y, float z)
     {
-        RaycastHit raycastHit;
-
-        if (Physics.Raycast(new Vector3(x, y, z), Vector3.down, out raycastHit, LayerMask.GetMask("Chunk")))
+        Collider[] colliders = Physics.OverlapBox(new Vector3(x, y, z), new Vector3(0.1f, 0.1f, 0.1f), Quaternion.identity, LayerMask.GetMask("Chunk Bounds"));
+        if (colliders.Length > 0 && colliders[0].transform.parent.GetComponent<Chunk>() != null)
         {
-            if (raycastHit.transform.GetComponent<Chunk>() != null)
-            {
-                return raycastHit.transform.GetComponent<Chunk>();
-            }
+            return colliders[0].transform.parent.GetComponent<Chunk>();
         }
 
         return null;
@@ -149,12 +154,9 @@ public class World : MonoBehaviour
     {
         bool spaceEmpty = true;
 
-        for (int i = 0; i < transform.childCount; i++)
+        if (GetChunk(transform.position + new Vector3(x * chunkSize * transform.lossyScale.x + chunkSize * transform.lossyScale.x * 0.5f, y * chunkSize * transform.lossyScale.y + chunkSize * transform.lossyScale.y * 0.5f, z * chunkSize * transform.lossyScale.z + chunkSize * transform.lossyScale.z * 0.5f)) != null)
         {
-            if (transform.GetChild(i).GetComponent<Chunk>().chunkIndex == new Vector3(x, y, z))
-            {
-                spaceEmpty = false;
-            }
+            spaceEmpty = false;
         }
 
         if (spaceEmpty == true)

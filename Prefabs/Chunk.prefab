@@ -46,10 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00de47b60a9ba744da3bbdc17cd942fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chunkSize: 16
-  position: {x: 0, y: 0, z: 0}
-  _meshFilter: {fileID: 0}
-  _meshCollider: {fileID: 0}
+  points: []
+  chunkIndex: {x: 0, y: 0, z: 0}
 --- !u!23 &7489232383384105728
 MeshRenderer:
   m_ObjectHideFlags: 0

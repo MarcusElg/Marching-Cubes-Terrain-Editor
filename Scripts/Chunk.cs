@@ -21,13 +21,23 @@ public class Chunk : MonoBehaviour
         if (world.settings.FindProperty("hideNonEditableChildren").boolValue == true)
         {
             gameObject.hideFlags = HideFlags.HideInHierarchy;
-        } else
+        }
+        else
         {
             gameObject.hideFlags = HideFlags.NotEditable;
         }
 
         this.chunkIndex = chunkIndex;
         points = new Point[(int)Mathf.Pow(world.chunkSize + 1, 3)];
+
+        // Collider
+        GameObject boundsObject = new GameObject("Bounds");
+        boundsObject.transform.SetParent(transform, false);
+        boundsObject.layer = LayerMask.NameToLayer("Chunk Bounds");
+        boundsObject.hideFlags = HideFlags.NotEditable;
+        boundsObject.AddComponent<BoxCollider>();
+        boundsObject.GetComponent<BoxCollider>().center = new Vector3(world.chunkSize * world.transform.lossyScale.x / 4, world.chunkSize * world.transform.lossyScale.x / 4, world.chunkSize * world.transform.lossyScale.x / 4);
+        boundsObject.GetComponent<BoxCollider>().size = new Vector3(world.chunkSize * world.transform.lossyScale.x / 2, world.chunkSize * world.transform.lossyScale.x / 2, world.chunkSize * world.transform.lossyScale.x / 2);
 
         ResetPoints(world);
     }
