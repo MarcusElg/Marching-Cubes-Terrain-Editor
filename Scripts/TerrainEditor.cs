@@ -106,36 +106,9 @@ public static class TerrainEditor
     public static void SetTerrain(World world, Vector3 point)
     {
         int hitX = point.x.Round();
-        int hitY = point.y.Round();
         int hitZ = point.z.Round();
-        Vector3 hitPos = new Vector3(hitX, hitY, hitZ);
 
         List<Chunk> chunksToUpdate = new List<Chunk>();
-
-        // Dertermine what chunks to update
-        Chunk chunk = world.GetChunk(hitPos + new Vector3(world.range, 0, world.range));
-        if (chunk != null && !chunksToUpdate.Contains(chunk))
-        {
-            chunksToUpdate.Add(chunk);
-        }
-
-        chunk = world.GetChunk(hitPos + new Vector3(world.range, 0, -world.range));
-        if (chunk != null && !chunksToUpdate.Contains(chunk))
-        {
-            chunksToUpdate.Add(chunk);
-        }
-
-        chunk = world.GetChunk(hitPos + new Vector3(-world.range, 0, world.range));
-        if (chunk != null && !chunksToUpdate.Contains(chunk))
-        {
-            chunksToUpdate.Add(chunk);
-        }
-
-        chunk = world.GetChunk(hitPos + new Vector3(-world.range, 0, -world.range));
-        if (chunk != null && !chunksToUpdate.Contains(chunk))
-        {
-            chunksToUpdate.Add(chunk);
-        }
 
         for (int x = -world.range; x <= world.range; x++)
         {
@@ -150,36 +123,23 @@ public static class TerrainEditor
                     continue;
                 }
 
-                Chunk chunk2 = world.GetChunk(offsetedX, hitY, offsetedZ);
-
-                if (chunk2 != null)
+                for (int y = 0; y <= world.chunkSize * world.maxHeightIndex; y++)
                 {
-                    for (int y = 0; y <= world.chunkSize * world.maxHeightIndex; y++)
+                    Chunk chunk = world.GetChunk(offsetedX, y * world.transform.lossyScale.x + world.transform.position.y, offsetedZ);
+
+                    if (chunk != null)
                     {
-                        if (y > world.chunkSize)
+                        if (y >= world.targetHeight)
                         {
-                            chunk2 = world.GetChunk(offsetedX, y * world.transform.lossyScale.x, offsetedZ);
-
-                            if (chunk2 != null && !chunksToUpdate.Contains(chunk2))
-                            {
-                                chunksToUpdate.Add(chunk2);
-                            }
+                            Vector3 position = (new Vector3(offsetedX, 0, offsetedZ) - chunk.transform.position) / world.transform.lossyScale.x;
+                            position.y = y - chunk.transform.localPosition.y;
+                            chunk.SetDensity(world, 1, position);
                         }
-
-                        if (chunk2 != null)
+                        else
                         {
-                            if (y >= world.targetHeight)
-                            {
-                                Vector3 position = (new Vector3(offsetedX, 0, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x;
-                                position.y = y - chunk2.transform.localPosition.y;
-                                chunk2.SetDensity(world, 1, position);
-                            }
-                            else
-                            {
-                                Vector3 position = (new Vector3(offsetedX, 0, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x;
-                                position.y = y - chunk2.transform.localPosition.y;
-                                chunk2.SetDensity(world, 0, position);
-                            }
+                            Vector3 position = (new Vector3(offsetedX, 0, offsetedZ) - chunk.transform.position) / world.transform.lossyScale.x;
+                            position.y = y - chunk.transform.localPosition.y;
+                            chunk.SetDensity(world, 0, position);
                         }
                     }
                 }

@@ -168,15 +168,4 @@ public class World : MonoBehaviour
             chunk.Generate(this);
         }
     }
-
-    public void ChangeChunkSizes()
-    {
-        for (int i = 0; i < transform.childCount; i++)
-        {
-            transform.GetChild(i).GetComponent<Chunk>().transform.position = transform.position + Vector3.Scale(transform.GetChild(i).GetComponent<Chunk>().chunkIndex, new Vector3(chunkSize * transform.lossyScale.x, chunkSize * transform.lossyScale.x, chunkSize * transform.lossyScale.x));
-            transform.GetChild(i).GetComponent<Chunk>().points = new Point[(int)Mathf.Pow(chunkSize + 1, 3)];
-            transform.GetChild(i).GetComponent<Chunk>().UpdateAfterReload(this);
-            transform.GetChild(i).GetComponent<Chunk>().Generate(this);
-        }
-    }
 }

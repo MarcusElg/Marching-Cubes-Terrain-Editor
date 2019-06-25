@@ -276,14 +276,6 @@ public class WorldEditor : Editor
         GUILayout.Label("Resetting Options", boldStyle);
         GUILayout.Label("Warning: changing these options will reset your terrain without undo support");
         serializedObject.FindProperty("chunkSize").intValue = Mathf.Clamp(EditorGUILayout.IntField("Chunk Divisions", serializedObject.FindProperty("chunkSize").intValue), 1, 50);
-
-        if (EditorGUI.EndChangeCheck() == true)
-        {
-            serializedObject.ApplyModifiedPropertiesWithoutUndo();
-            world.ChangeChunkSizes();
-        }
-
-        EditorGUI.BeginChangeCheck();
         serializedObject.FindProperty("groundHeight").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Ground Height", serializedObject.FindProperty("groundHeight").floatValue), 0, serializedObject.FindProperty("chunkSize").intValue * serializedObject.FindProperty("maxHeightIndex").intValue);
         serializedObject.FindProperty("generateNoise").boolValue = EditorGUILayout.Toggle("Generate Noise", serializedObject.FindProperty("generateNoise").boolValue);
 
@@ -469,6 +461,8 @@ public class WorldEditor : Editor
 
         for (int i = 0; i < world.transform.childCount; i++)
         {
+            world.transform.GetChild(i).GetComponent<Chunk>().ResetCollider(world);
+            world.transform.GetChild(i).transform.localPosition = new Vector3(world.transform.GetChild(i).GetComponent<Chunk>().chunkIndex.x * world.chunkSize, world.transform.GetChild(i).GetComponent<Chunk>().chunkIndex.y * world.chunkSize, world.transform.GetChild(i).GetComponent<Chunk>().chunkIndex.z * world.chunkSize);
             world.transform.GetChild(i).GetComponent<Chunk>().ResetPoints(world);
         }
 

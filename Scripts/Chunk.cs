@@ -28,7 +28,6 @@ public class Chunk : MonoBehaviour
         }
 
         this.chunkIndex = chunkIndex;
-        points = new Point[(int)Mathf.Pow(world.chunkSize + 1, 3)];
 
         // Collider
         GameObject boundsObject = new GameObject("Bounds");
@@ -36,15 +35,22 @@ public class Chunk : MonoBehaviour
         boundsObject.layer = LayerMask.NameToLayer("Chunk Bounds");
         boundsObject.hideFlags = HideFlags.NotEditable;
         boundsObject.AddComponent<BoxCollider>();
-        boundsObject.GetComponent<BoxCollider>().center = new Vector3(world.chunkSize * world.transform.lossyScale.x / 4, world.chunkSize * world.transform.lossyScale.x / 4, world.chunkSize * world.transform.lossyScale.x / 4);
-        boundsObject.GetComponent<BoxCollider>().size = new Vector3(world.chunkSize * world.transform.lossyScale.x / 2, world.chunkSize * world.transform.lossyScale.x / 2, world.chunkSize * world.transform.lossyScale.x / 2);
 
+        ResetCollider(world);
         ResetPoints(world);
+    }
+
+    public void ResetCollider(World world)
+    {
+        transform.GetChild(0).GetComponent<BoxCollider>().center = new Vector3(world.chunkSize * world.transform.lossyScale.x / 4, world.chunkSize * world.transform.lossyScale.x / 4, world.chunkSize * world.transform.lossyScale.x / 4);
+        transform.GetChild(0).GetComponent<BoxCollider>().size = new Vector3(world.chunkSize * world.transform.lossyScale.x / 2, world.chunkSize * world.transform.lossyScale.x / 2, world.chunkSize * world.transform.lossyScale.x / 2);
     }
 
     public void ResetPoints(World world)
     {
         UpdateAfterReload(world);
+
+        points = new Point[(int)Mathf.Pow(world.chunkSize + 1, 3)];
 
         for (int x = 0; x < world.chunkSize + 1; x++)
         {
