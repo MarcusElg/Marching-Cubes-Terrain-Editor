@@ -130,7 +130,7 @@ public class WorldEditor : Editor
     {
         EditorGUI.BeginChangeCheck();
         serializedObject.FindProperty("range").intValue = Mathf.Clamp(EditorGUILayout.IntField("Range", serializedObject.FindProperty("range").intValue), 1, Mathf.RoundToInt(serializedObject.FindProperty("chunkSize").intValue * 0.375f * world.transform.lossyScale.x));
-        serializedObject.FindProperty("force").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Force", serializedObject.FindProperty("force").floatValue), 0.1f, 10f);
+        serializedObject.FindProperty("force").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Force", serializedObject.FindProperty("force").floatValue), 0.1f, 1f);
         serializedObject.FindProperty("forceOverDistance").animationCurveValue = EditorGUILayout.CurveField("Force Over Distance", serializedObject.FindProperty("forceOverDistance").animationCurveValue);
 
         if (EditorGUI.EndChangeCheck() == true)
@@ -200,7 +200,7 @@ public class WorldEditor : Editor
     {
         EditorGUI.BeginChangeCheck();
         serializedObject.FindProperty("range").intValue = Mathf.Clamp(EditorGUILayout.IntField("Range", serializedObject.FindProperty("range").intValue), 1, Mathf.RoundToInt(serializedObject.FindProperty("chunkSize").intValue * 0.375f * world.transform.lossyScale.x));
-        serializedObject.FindProperty("force").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Force", serializedObject.FindProperty("force").floatValue), 0.1f, 10f);
+        serializedObject.FindProperty("force").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Force", serializedObject.FindProperty("force").floatValue), 0.1f, 1f);
         serializedObject.FindProperty("forceOverDistance").animationCurveValue = EditorGUILayout.CurveField("Force Over Distance", serializedObject.FindProperty("forceOverDistance").animationCurveValue);
 
         if (EditorGUI.EndChangeCheck() == true)
@@ -416,6 +416,11 @@ public class WorldEditor : Editor
                     {
                         Handles.color = Color.white;
                         Handles.DrawWireDisc(raycastHit.point, Vector3.up, world.range);
+
+                        if (leftButtonDown == true)
+                        {
+                            TerrainEditor.SmoothTerrain(world, raycastHit.point);
+                        }
                     }
                     else if (world.terrainMode == World.TerrainMode.Paint)
                     {

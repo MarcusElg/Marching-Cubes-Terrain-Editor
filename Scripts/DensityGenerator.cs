@@ -1,4 +1,6 @@
-﻿public class DensityGenerator
+﻿using UnityEngine;
+
+public class DensityGenerator
 {
     public FastNoise noise;
 

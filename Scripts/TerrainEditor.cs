@@ -6,8 +6,7 @@ public static class TerrainEditor
 
     public static void ModifyTerrain(World world, Vector3 point, bool addTerrain)
     {
-        int buildModifier = addTerrain ? 1 : -1;
-
+        int buildModifier = addTerrain ? -1 : 1;
         int hitX = point.x.Round();
         int hitY = point.y.Round();
         int hitZ = point.z.Round();
@@ -36,7 +35,7 @@ public static class TerrainEditor
                         continue;
                     }
 
-                    float modificationAmount = world.force / distance * world.forceOverDistance.Evaluate(1 - distance.Map(0, world.force, 0, 1)) * buildModifier;
+                    float modificationAmount = distance * world.forceOverDistance.Evaluate(1 - distance.Map(0, world.force, 0, 1)) * buildModifier;
                     Chunk chunk2 = world.GetChunk(offsetedX, offsetedY, offsetedZ);
 
                     if (chunk2 != null)
@@ -44,7 +43,7 @@ public static class TerrainEditor
                         Vector3 point2 = (new Vector3(offsetedX, offsetedY, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x;
 
                         float oldDensity = world.GetPoint(new Vector3Int(Mathf.RoundToInt(point2.x), Mathf.RoundToInt(point2.y), Mathf.RoundToInt(point2.z))).density;
-                        float newDensity = oldDensity - modificationAmount;
+                        float newDensity = oldDensity + modificationAmount;
                         newDensity = newDensity.Clamp01();
 
                         Point p = chunk2.GetPoint(world, new Vector3Int(Mathf.RoundToInt(point.x), Mathf.RoundToInt(point2.y), Mathf.RoundToInt(point2.z)));
@@ -224,6 +223,81 @@ public static class TerrainEditor
                             chunk.SetDensity(world, 1, localPosition);
                         }
                     }
+                }
+            }
+        }
+
+        for (int i = 0; i < chunksToUpdate.Count; i++)
+        {
+            chunksToUpdate[i].Generate(world);
+        }
+    }
+
+    public static void SmoothTerrain(World world, Vector3 point)
+    {
+        List<Chunk> chunksToUpdate = new List<Chunk>();
+        float[,] densities = new float[world.range * 2 + 2, world.range * 2 + 2];
+        Chunk[,] chunks = new Chunk[world.range * 2 + 2, world.range * 2 + 2];
+        Point[,] points = new Point[world.range * 2 + 2, world.range * 2 + 2];
+
+        // Add densities
+        for (int x = -world.range - 1; x <= world.range; x++)
+        {
+            for (int z = -world.range - 1; z <= world.range; z++)
+            {
+                Chunk chunk = world.GetChunk(point.x + x, point.y, point.z + z);
+
+                if (chunk != null)
+                {
+                    if (!chunksToUpdate.Contains(chunk))
+                    {
+                        chunksToUpdate.Add(chunk);
+                    }
+
+                    densities[x + world.range + 1, z + world.range + 1] = chunk.GetPoint(world, (new Vector3(point.x + x, point.y, point.z + z) - chunk.transform.position) / world.transform.lossyScale.x).density;
+                    chunks[x + world.range + 1, z + world.range + 1] = chunk;
+                    points[x + world.range + 1, z + world.range + 1] = chunk.GetPoint(world, (new Vector3(point.x + x, point.y, point.z + z) - chunk.transform.position) / world.transform.lossyScale.x);
+                }
+                else
+                {
+                    densities[x + world.range + 1, z + world.range + 1] = float.MaxValue;
+                }
+            }
+        }
+
+        // Calculate smoothed value
+        for (int x = 1; x < densities.GetLength(0) - 1; x++)
+        {
+            for (int z = 1; z < densities.GetLength(1) - 1; z++)
+            {
+                if (chunks[x, z] != null)
+                {
+                    List<float> nonNullDensities = new List<float>();
+                    nonNullDensities.Add(densities[x + 1, z]);
+                    nonNullDensities.Add(densities[x, z + 1]);
+                    nonNullDensities.Add(densities[x - 1, z]);
+                    nonNullDensities.Add(densities[x, z - 1]);
+                    nonNullDensities.Add(densities[x + 1, z + 1]);
+                    nonNullDensities.Add(densities[x - 1, z - 1]);
+                    nonNullDensities.Add(densities[x - 1, z + 1]);
+                    nonNullDensities.Add(densities[x + 1, z - 1]);
+
+                    float totalDensity = 0;
+
+                    for (int i = 0; i < nonNullDensities.Count; i++)
+                    {
+                        if (nonNullDensities[i] == float.MaxValue)
+                        {
+                            nonNullDensities.RemoveAt(i);
+                        }
+                        else
+                        {
+                            totalDensity += nonNullDensities[i];
+                        }
+                    }
+
+                    float averageDensity = totalDensity / nonNullDensities.Count;
+                    chunks[x, z].SetDensity(world, Mathf.Lerp(points[x, z].density, averageDensity, world.force), points[x, z].localPosition);
                 }
             }
         }
