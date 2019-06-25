@@ -143,7 +143,6 @@ public class WorldEditor : Editor
     {
         EditorGUI.BeginChangeCheck();
         serializedObject.FindProperty("range").intValue = Mathf.Clamp(EditorGUILayout.IntField("Range", serializedObject.FindProperty("range").intValue), 1, Mathf.RoundToInt(serializedObject.FindProperty("chunkSize").intValue * 0.375f * world.transform.lossyScale.x));
-        serializedObject.FindProperty("forceOverDistance").animationCurveValue = EditorGUILayout.CurveField("Force Over Distance", serializedObject.FindProperty("forceOverDistance").animationCurveValue);
         serializedObject.FindProperty("targetHeight").intValue = Mathf.Clamp(EditorGUILayout.IntField("Target Height", serializedObject.FindProperty("targetHeight").intValue), 1, serializedObject.FindProperty("chunkSize").intValue * serializedObject.FindProperty("maxHeightIndex").intValue);
 
         if (GUILayout.Button("Set All") == true)
