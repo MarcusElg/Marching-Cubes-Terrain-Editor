@@ -285,7 +285,7 @@ public static class TerrainEditor
                     AddNeighboringPoints(ref totalDensity, ref amountOfDensities, densities, x, 1, z);
                     AddNeighboringPoints(ref totalDensity, ref amountOfDensities, densities, x, 2, z);
 
-                    float averageDensity = totalDensity / amountOfDensities;
+                    float averageDensity = totalDensity / (amountOfDensities / 3);
                     chunks[x, 1, z].SetDensity(world, Mathf.Lerp(points[x, 1, z].density, averageDensity, world.force), points[x, 1, z].localPosition);
                 }
             }
