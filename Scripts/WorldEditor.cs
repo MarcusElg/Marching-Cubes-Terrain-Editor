@@ -129,7 +129,7 @@ public class WorldEditor : Editor
     private void InspectorModify()
     {
         EditorGUI.BeginChangeCheck();
-        serializedObject.FindProperty("range").intValue = Mathf.Clamp(EditorGUILayout.IntField("Range", serializedObject.FindProperty("range").intValue), 1, Mathf.RoundToInt(serializedObject.FindProperty("chunkSize").intValue * 0.375f * world.transform.lossyScale.x));
+        serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 0.1f, serializedObject.FindProperty("chunkSize").intValue * 0.375f * world.transform.lossyScale.x);
         serializedObject.FindProperty("force").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Force", serializedObject.FindProperty("force").floatValue), 0.1f, 1f);
         serializedObject.FindProperty("forceOverDistance").animationCurveValue = EditorGUILayout.CurveField("Force Over Distance", serializedObject.FindProperty("forceOverDistance").animationCurveValue);
 
@@ -142,7 +142,7 @@ public class WorldEditor : Editor
     private void InspectorSet()
     {
         EditorGUI.BeginChangeCheck();
-        serializedObject.FindProperty("range").intValue = Mathf.Clamp(EditorGUILayout.IntField("Range", serializedObject.FindProperty("range").intValue), 1, Mathf.RoundToInt(serializedObject.FindProperty("chunkSize").intValue * 0.375f * world.transform.lossyScale.x));
+        serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 0.1f, serializedObject.FindProperty("chunkSize").intValue * 0.375f * world.transform.lossyScale.x);
         serializedObject.FindProperty("targetHeight").intValue = Mathf.Clamp(EditorGUILayout.IntField("Target Height", serializedObject.FindProperty("targetHeight").intValue), 1, serializedObject.FindProperty("chunkSize").intValue * serializedObject.FindProperty("maxHeightIndex").intValue);
 
         if (GUILayout.Button("Set All") == true)
@@ -176,7 +176,7 @@ public class WorldEditor : Editor
     private void InspectorLine()
     {
         EditorGUI.BeginChangeCheck();
-        serializedObject.FindProperty("range").intValue = Mathf.Clamp(EditorGUILayout.IntField("Range", serializedObject.FindProperty("range").intValue), 1, Mathf.RoundToInt(serializedObject.FindProperty("chunkSize").intValue * 0.375f * world.transform.lossyScale.x));
+        serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 0.1f, serializedObject.FindProperty("chunkSize").intValue * 0.375f * world.transform.lossyScale.x);
         serializedObject.FindProperty("addTerrain").boolValue = EditorGUILayout.Toggle("Add Terrain", serializedObject.FindProperty("addTerrain").boolValue);
 
         if (serializedObject.FindProperty("addTerrain").boolValue == false)
@@ -199,7 +199,7 @@ public class WorldEditor : Editor
     private void InspectorSmooth()
     {
         EditorGUI.BeginChangeCheck();
-        serializedObject.FindProperty("range").intValue = Mathf.Clamp(EditorGUILayout.IntField("Range", serializedObject.FindProperty("range").intValue), 1, Mathf.RoundToInt(serializedObject.FindProperty("chunkSize").intValue * 0.375f * world.transform.lossyScale.x));
+        serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 0.1f, serializedObject.FindProperty("chunkSize").intValue * 0.375f * world.transform.lossyScale.x);
         serializedObject.FindProperty("force").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Force", serializedObject.FindProperty("force").floatValue), 0.1f, 1f);
         serializedObject.FindProperty("forceOverDistance").animationCurveValue = EditorGUILayout.CurveField("Force Over Distance", serializedObject.FindProperty("forceOverDistance").animationCurveValue);
 
@@ -212,7 +212,7 @@ public class WorldEditor : Editor
     private void InspectorPaint()
     {
         EditorGUI.BeginChangeCheck();
-        serializedObject.FindProperty("range").intValue = Mathf.Clamp(EditorGUILayout.IntField("Range", serializedObject.FindProperty("range").intValue), 1, Mathf.RoundToInt(serializedObject.FindProperty("chunkSize").intValue * 0.375f * world.transform.lossyScale.x));
+        serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 0.1f, serializedObject.FindProperty("chunkSize").intValue * 0.375f * world.transform.lossyScale.x);
         serializedObject.FindProperty("roundToNearestPoint").boolValue = EditorGUILayout.Toggle("Round To Nearest Point", serializedObject.FindProperty("roundToNearestPoint").boolValue);
         serializedObject.FindProperty("colour").colorValue = EditorGUILayout.ColorField("Colour", serializedObject.FindProperty("colour").colorValue);
         serializedObject.FindProperty("useColourMask").boolValue = EditorGUILayout.Toggle("Use Colour Mask", serializedObject.FindProperty("useColourMask").boolValue);

@@ -5,7 +5,7 @@ using UnityEngine;
 public class World : MonoBehaviour
 {
     /// Modify
-    public int range = 2;
+    public float range = 2;
     public float force = 2f;
     public AnimationCurve forceOverDistance = AnimationCurve.Constant(0, 1, 1);
 
