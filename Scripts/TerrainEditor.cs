@@ -12,12 +12,7 @@ public static class TerrainEditor
         int hitZ = point.z.Round();
         Vector3 hitPos = new Vector3(hitX, hitY, hitZ);
 
-        // Dertermine what chunks to update
-        Chunk centerChunk = world.GetChunk(point);
-        Chunk topLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 0, world.range + 0.1f));
-        Chunk topRightChunk = world.GetChunk(point + new Vector3(world.range + 0.1f, 0, world.range + 0.1f));
-        Chunk bottomLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 0, -world.range - 0.1f));
-        Chunk bottomRightChunk = world.GetChunk(point + new Vector3(world.range + 0.1f, 0, -world.range - 0.1f));
+        List<Chunk> chunksToUpdate = new List<Chunk>();
 
         for (int x = -world.range; x <= world.range; x++)
         {
@@ -36,69 +31,29 @@ public static class TerrainEditor
                     }
 
                     float modificationAmount = distance * world.forceOverDistance.Evaluate(1 - distance.Map(0, world.force, 0, 1)) * buildModifier;
-                    Chunk chunk2 = world.GetChunk(offsetedX, offsetedY, offsetedZ);
+                    List<Chunk> chunks = world.GetChunks(offsetedX, offsetedY, offsetedZ);
 
-                    if (chunk2 != null)
+                    for (int i = 0; i < chunks.Count; i++)
                     {
-                        Vector3 point2 = (new Vector3(offsetedX, offsetedY, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x;
+                        if (!chunksToUpdate.Contains(chunks[i]))
+                        {
+                            chunksToUpdate.Add(chunks[i]);
+                        }
 
+                        Vector3 point2 = (new Vector3(offsetedX, offsetedY, offsetedZ) - chunks[i].transform.position) / world.transform.lossyScale.x;
                         float oldDensity = world.GetPoint(new Vector3Int(Mathf.RoundToInt(point2.x), Mathf.RoundToInt(point2.y), Mathf.RoundToInt(point2.z))).density;
                         float newDensity = oldDensity + modificationAmount;
                         newDensity = newDensity.Clamp01();
-
-                        Point p = chunk2.GetPoint(world, new Vector3Int(Mathf.RoundToInt(point.x), Mathf.RoundToInt(point2.y), Mathf.RoundToInt(point2.z)));
-
-                        // Don't edit last points as they should be edited by the others first points
-                        if (p.localPosition.x < world.chunkSize && p.localPosition.z < world.chunkSize)
-                        {
-                            if (Mathf.RoundToInt(point2.x) == 0)
-                            {
-                                Chunk borderChunk = world.GetChunk(offsetedX - 1, offsetedY, offsetedZ);
-
-                                if (borderChunk != null)
-                                {
-                                    borderChunk.SetDensity(world, newDensity, new Vector3(world.chunkSize, point2.y, point2.z));
-                                }
-                            }
-
-                            if (Mathf.RoundToInt(point2.z) == 0)
-                            {
-                                Chunk borderChunk = world.GetChunk(offsetedX, offsetedY, offsetedZ - 1);
-
-                                if (borderChunk != null)
-                                {
-                                    borderChunk.SetDensity(world, newDensity, new Vector3(point2.x, point2.y, world.chunkSize));
-                                }
-                            }
-
-                            chunk2.SetDensity(world, newDensity, point2);
-                        }
+                        chunks[i].SetDensity(world, newDensity, point2);
                     }
                 }
             }
         }
 
         // Update chunks
-        centerChunk.Generate(world);
-
-        if (topLeftChunk != null)
+        for (int i = 0; i < chunksToUpdate.Count; i++)
         {
-            topLeftChunk.Generate(world);
-        }
-
-        if (topRightChunk != null)
-        {
-            topRightChunk.Generate(world);
-        }
-
-        if (bottomLeftChunk != null)
-        {
-            bottomLeftChunk.Generate(world);
-        }
-
-        if (bottomRightChunk != null)
-        {
-            bottomRightChunk.Generate(world);
+            chunksToUpdate[i].Generate(world);
         }
     }
 
@@ -124,26 +79,26 @@ public static class TerrainEditor
 
                 for (int y = 0; y <= world.chunkSize * world.maxHeightIndex; y++)
                 {
-                    Chunk chunk = world.GetChunk(offsetedX, y * world.transform.lossyScale.x + world.transform.position.y, offsetedZ);
+                    List<Chunk> chunks = world.GetChunks(offsetedX, y * world.transform.lossyScale.x + world.transform.position.y, offsetedZ);
 
-                    if (chunk != null)
+                    for (int i = 0; i < chunks.Count; i++)
                     {
-                        if (!chunksToUpdate.Contains(chunk))
+                        if (!chunksToUpdate.Contains(chunks[i]))
                         {
-                            chunksToUpdate.Add(chunk);
+                            chunksToUpdate.Add(chunks[i]);
                         }
 
                         if (y >= world.targetHeight)
                         {
-                            Vector3 position = (new Vector3(offsetedX, 0, offsetedZ) - chunk.transform.position) / world.transform.lossyScale.x;
-                            position.y = y - chunk.transform.localPosition.y;
-                            chunk.SetDensity(world, 1, position);
+                            Vector3 position = (new Vector3(offsetedX, 0, offsetedZ) - chunks[i].transform.position) / world.transform.lossyScale.x;
+                            position.y = y - chunks[i].transform.localPosition.y;
+                            chunks[i].SetDensity(world, 1, position);
                         }
                         else
                         {
-                            Vector3 position = (new Vector3(offsetedX, 0, offsetedZ) - chunk.transform.position) / world.transform.lossyScale.x;
-                            position.y = y - chunk.transform.localPosition.y;
-                            chunk.SetDensity(world, 0, position);
+                            Vector3 position = (new Vector3(offsetedX, 0, offsetedZ) - chunks[i].transform.position) / world.transform.lossyScale.x;
+                            position.y = y - chunks[i].transform.localPosition.y;
+                            chunks[i].SetDensity(world, 0, position);
                         }
                     }
                 }
@@ -188,13 +143,13 @@ public static class TerrainEditor
                 for (int y = startY; y <= endY; y++)
                 {
                     Vector3 offsetPosition = position + left * x + Vector3.up * y;
-                    Chunk chunk = world.GetChunk(new Vector3(offsetPosition.x, offsetPosition.y, offsetPosition.z));
+                    List<Chunk> chunks = world.GetChunks(new Vector3(offsetPosition.x, offsetPosition.y, offsetPosition.z));
 
-                    if (chunk != null)
+                    for (int i = 0; i < chunks.Count; i++)
                     {
-                        if (!chunksToUpdate.Contains(chunk))
+                        if (!chunksToUpdate.Contains(chunks[i]))
                         {
-                            chunksToUpdate.Add(chunk);
+                            chunksToUpdate.Add(chunks[i]);
                         }
 
                         float distanceToCenter = Vector3.Distance(position + new Vector3(x, y, 0), position);
@@ -205,11 +160,11 @@ public static class TerrainEditor
 
                         if (world.addTerrain == true)
                         {
-                            chunk.SetDensity(world, 0, (offsetPosition - chunk.transform.position) / world.transform.lossyScale.x);
+                            chunks[i].SetDensity(world, 0, (offsetPosition - chunks[i].transform.position) / world.transform.lossyScale.x);
                         }
                         else
                         {
-                            chunk.SetDensity(world, 1, (offsetPosition - chunk.transform.position) / world.transform.lossyScale.x);
+                            chunks[i].SetDensity(world, 1, (offsetPosition - chunks[i].transform.position) / world.transform.lossyScale.x);
                         }
                     }
                 }
@@ -217,15 +172,20 @@ public static class TerrainEditor
                 if (world.clearAbove == true && world.addTerrain == false)
                 {
                     Vector3 offsetPosition = position + left * x;
-                    Chunk chunk = world.GetChunk(new Vector3(offsetPosition.x, offsetPosition.y, offsetPosition.z));
+                    List<Chunk> chunks = world.GetChunks(new Vector3(offsetPosition.x, offsetPosition.y, offsetPosition.z));
 
-                    if (chunk != null)
+                    for (int i = 0; i < chunks.Count; i++)
                     {
-                        for (int y = Mathf.RoundToInt((position.y - chunk.transform.position.y) / world.transform.lossyScale.x); y <= world.chunkSize; y++)
+                        if (!chunksToUpdate.Contains(chunks[i]))
                         {
-                            Vector3 localPosition = (offsetPosition - chunk.transform.position) / world.transform.lossyScale.x;
+                            chunksToUpdate.Add(chunks[i]);
+                        }
+
+                        for (int y = Mathf.RoundToInt((position.y - chunks[i].transform.position.y) / world.transform.lossyScale.x); y <= world.chunkSize; y++)
+                        {
+                            Vector3 localPosition = (offsetPosition - chunks[i].transform.position) / world.transform.lossyScale.x;
                             localPosition.y = y;
-                            chunk.SetDensity(world, 1, localPosition);
+                            chunks[i].SetDensity(world, 1, localPosition);
                         }
                     }
                 }
@@ -330,12 +290,7 @@ public static class TerrainEditor
             point = (point - world.transform.position).RoundToNearestX(world.transform.lossyScale.x) + world.transform.position;
         }
 
-        // Dertermine what chunks to update
-        Chunk centerChunk = world.GetChunk(point);
-        Chunk topLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 0, world.range + 0.1f));
-        Chunk topRightChunk = world.GetChunk(point + new Vector3(world.range + 0.1f, 0, world.range + 0.1f));
-        Chunk bottomLeftChunk = world.GetChunk(point + new Vector3(-world.range - 0.1f, 0, -world.range - 0.1f));
-        Chunk bottomRightChunk = world.GetChunk(point + new Vector3(world.range + 0.1f, 0, -world.range - 0.1f));
+        List<Chunk> chunksToUpdate = new List<Chunk>();
 
         for (int x = -world.range; x <= world.range; x++)
         {
@@ -353,17 +308,22 @@ public static class TerrainEditor
                         continue;
                     }
 
-                    Chunk chunk2 = world.GetChunk(offsetedX, offsetedY, offsetedZ);
+                    List<Chunk> chunks = world.GetChunks(offsetedX, offsetedY, offsetedZ);
 
-                    if (chunk2 != null)
+                    for (int i = 0; i < chunks.Count; i++)
                     {
+                        if (!chunksToUpdate.Contains(chunks[i]))
+                        {
+                            chunksToUpdate.Add(chunks[i]);
+                        }
+
                         if (world.useColourMask == false)
                         {
-                            chunk2.SetColor(world, world.colour, (new Vector3(offsetedX, offsetedY, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x);
+                            chunks[i].SetColor(world, world.colour, (new Vector3(offsetedX, offsetedY, offsetedZ) - chunks[i].transform.position) / world.transform.lossyScale.x);
                         }
                         else
                         {
-                            Color colour = chunk2.GetPoint(world, (new Vector3(offsetedX, offsetedY, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x).colour;
+                            Color colour = chunks[i].GetPoint(world, (new Vector3(offsetedX, offsetedY, offsetedZ) - chunks[i].transform.position) / world.transform.lossyScale.x).colour;
                             float h, s, v;
                             float h2, s2, v2;
                             Color.RGBToHSV(colour, out h, out s, out v);
@@ -371,7 +331,7 @@ public static class TerrainEditor
 
                             if (Mathf.Abs(h - h2) < world.colourMaskTolerance && Mathf.Abs(s - s2) < world.colourMaskTolerance && Mathf.Abs(v - v2) < world.colourMaskTolerance)
                             {
-                                chunk2.SetColor(world, world.colour, (new Vector3(offsetedX, offsetedY, offsetedZ) - chunk2.transform.position) / world.transform.lossyScale.x);
+                                chunks[i].SetColor(world, world.colour, (new Vector3(offsetedX, offsetedY, offsetedZ) - chunks[i].transform.position) / world.transform.lossyScale.x);
                             }
                         }
                     }
@@ -380,26 +340,9 @@ public static class TerrainEditor
         }
 
         // Update chunks
-        centerChunk.Generate(world);
-
-        if (topLeftChunk != null)
+        for (int i = 0; i < chunksToUpdate.Count; i++)
         {
-            topLeftChunk.Generate(world);
-        }
-
-        if (topRightChunk != null)
-        {
-            topRightChunk.Generate(world);
-        }
-
-        if (bottomLeftChunk != null)
-        {
-            bottomLeftChunk.Generate(world);
-        }
-
-        if (bottomRightChunk != null)
-        {
-            bottomRightChunk.Generate(world);
+            chunksToUpdate[i].Generate(world);
         }
     }
 }

@@ -121,6 +121,27 @@ public class World : MonoBehaviour
         return null;
     }
 
+    public List<Chunk> GetChunks(float x, float y, float z)
+    {
+        return GetChunks(new Vector3(x, y, z));
+    }
+
+    public List<Chunk> GetChunks(Vector3 position)
+    {
+        Collider[] colliders = Physics.OverlapBox(position, new Vector3(0.1f, 0.1f, 0.1f), Quaternion.identity, LayerMask.GetMask("Chunk Bounds"));
+        List<Chunk> chunks = new List<Chunk>();
+
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            if (colliders[i].transform.parent.GetComponent<Chunk>() != null)
+            {
+                chunks.Add(colliders[i].transform.parent.GetComponent<Chunk>());
+            }
+        }
+
+        return chunks;
+    }
+
     public Point GetPoint(Vector3 pos)
     {
         return GetPoint(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y), Mathf.RoundToInt(pos.z));
