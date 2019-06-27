@@ -23,11 +23,11 @@ public class DensityGenerator
     {
         if (world.generateNoise == true)
         {
-            return worldPosY - noise.GetPerlin(worldPosX / noiseScale, worldPosZ / noiseScale).Map(-1, 1, 0, 1) * world.noiseScale * 10 - world.groundHeight;
+            return worldPosY - noise.GetPerlin(worldPosX / noiseScale, worldPosZ / noiseScale).Map(-1, 1, 0, 1) * world.noiseScale * 10 - world.groundHeight - world.transform.position.y;
         }
         else
         {
-            return worldPosY - world.groundHeight;
+            return worldPosY - world.groundHeight - world.transform.position.y;
         }
     }
 
