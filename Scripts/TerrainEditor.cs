@@ -7,23 +7,25 @@ public static class TerrainEditor
     public static void ModifyTerrain(World world, Vector3 point, bool addTerrain)
     {
         int buildModifier = addTerrain ? -1 : 1;
-        int hitX = point.x.Round();
-        int hitY = point.y.Round();
-        int hitZ = point.z.Round();
-        Vector3 hitPos = new Vector3(hitX, hitY, hitZ);
 
         List<Chunk> chunksToUpdate = new List<Chunk>();
         List<Vector3> alreadyModifiedPoints = new List<Vector3>();
 
-        for (float x = -world.range; x <= world.range; x++)
+        float start = -world.range;
+        if (world.range < 1)
         {
-            for (float y = -world.range; y <= world.range; y++)
+            start = 0;
+        }
+
+        for (float x = start; x <= world.range; x++)
+        {
+            for (float y = start; y <= world.range; y++)
             {
-                for (float z = -world.range; z <= world.range; z++)
+                for (float z = start; z <= world.range; z++)
                 {
-                    float offsetedX = hitX - x;
-                    float offsetedY = hitY - y;
-                    float offsetedZ = hitZ - z;
+                    float offsetedX = point.x - x;
+                    float offsetedY = point.y - y;
+                    float offsetedZ = point.z - z;
 
                     float distance = Utils.Distance(offsetedX, offsetedY, offsetedZ, point);
                     if (!(distance <= world.range))
@@ -72,17 +74,20 @@ public static class TerrainEditor
 
     public static void SetTerrain(World world, Vector3 point)
     {
-        int hitX = point.x.Round();
-        int hitZ = point.z.Round();
-
         List<Chunk> chunksToUpdate = new List<Chunk>();
 
-        for (float x = -world.range; x <= world.range; x++)
+        float start = -world.range;
+        if (world.range < 1)
         {
-            for (float z = -world.range; z <= world.range; z++)
+            start = 0;
+        }
+
+        for (float x = start; x <= world.range; x++)
+        {
+            for (float z = start; z <= world.range; z++)
             {
-                float offsetedX = hitX - x;
-                float offsetedZ = hitZ - z;
+                float offsetedX = point.x - x;
+                float offsetedZ = point.z - z;
 
                 float distance = Utils.Distance(offsetedX, point.y, offsetedZ, point);
                 if (!(distance <= world.range))
@@ -135,12 +140,18 @@ public static class TerrainEditor
 
         List<Chunk> chunksToUpdate = new List<Chunk>();
 
+        float start = -world.range;
+        if (world.range < 1)
+        {
+            start = 0;
+        }
+
         for (float f = 0; f < 1; f += distancePerLerp)
         {
             Vector3 position = Vector3.Lerp(world.startPosition, world.endPosition, f);
 
             float startY = -world.range;
-            if (world.flatFloor == true && world.addTerrain == false)
+            if ((world.flatFloor == true && world.addTerrain == false) || world.range < 1)
             {
                 startY = 0;
             }
@@ -151,7 +162,7 @@ public static class TerrainEditor
                 endY = 0;
             }
 
-            for (float x = -world.range; x <= world.range; x++)
+            for (float x = start; x <= world.range; x++)
             {
                 for (float y = startY; y <= endY; y++)
                 {
@@ -221,12 +232,18 @@ public static class TerrainEditor
         Vector3 left = new Vector3(-up.z, up.y, up.x).normalized;
         Vector3 forward = new Vector3(left.x, left.y, -left.z).normalized;
 
+        int start = Mathf.FloorToInt(-world.range);
+        if (world.range < 1)
+        {
+            start = 0;
+        }
+
         // Add densities
-        for (int x = -Mathf.CeilToInt(world.range) - 1; x <= world.range; x++)
+        for (int x = start; x <= world.range; x++)
         {
             for (int y = -1; y <= 1; y++)
             {
-                for (int z = -Mathf.CeilToInt(world.range) - 1; z <= world.range; z++)
+                for (int z = start; z <= world.range; z++)
                 {
                     List<Chunk> worldChunks = world.GetChunks(((new Vector3(point.x, point.y, point.z) + x * left + y * up + z * forward) - world.transform.position).RoundToNearestX(world.transform.lossyScale.x) + world.transform.position);
 
