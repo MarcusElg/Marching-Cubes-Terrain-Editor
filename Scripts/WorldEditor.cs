@@ -128,11 +128,17 @@ public class WorldEditor : Editor
 
     private void InspectorModify()
     {
+        bool apply = false;
         EditorGUI.BeginChangeCheck();
+        if (serializedObject.FindProperty("range").floatValue < 1)
+        {
+            apply = true;
+        }
+
         serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 1f, serializedObject.FindProperty("chunkSize").intValue * 0.375f * world.transform.lossyScale.x);
         serializedObject.FindProperty("force").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Force", serializedObject.FindProperty("force").floatValue), 0.01f, 1f);
 
-        if (EditorGUI.EndChangeCheck() == true)
+        if (EditorGUI.EndChangeCheck() == true || apply == true)
         {
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
         }
