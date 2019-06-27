@@ -9,7 +9,7 @@ public class World : MonoBehaviour
     public float force = 2f;
 
     // Set
-    public int targetHeight = 10;
+    public float targetHeight = 10f;
 
     // Line
     public Vector3 startPosition = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
@@ -89,6 +89,18 @@ public class World : MonoBehaviour
             }
         }
 
+        // Fix new max height
+        int currentMaxIndex = 1;
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            if (transform.GetChild(i).GetComponent<Chunk>().chunkIndex.y + 1 > currentMaxIndex)
+            {
+                currentMaxIndex = transform.GetChild(i).GetComponent<Chunk>().chunkIndex.y + 1;
+            }
+        }
+
+        maxHeightIndex = currentMaxIndex;
+
         if (transform.childCount == 0)
         {
             AddChunks(Vector3Int.zero, Vector3Int.zero);
@@ -101,6 +113,8 @@ public class World : MonoBehaviour
         {
             DestroyImmediate(transform.GetChild(i).gameObject);
         }
+
+        maxHeightIndex = 1;
     }
 
     public Chunk GetChunk(Vector3 position)

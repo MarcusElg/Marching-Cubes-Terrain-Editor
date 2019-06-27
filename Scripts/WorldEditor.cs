@@ -148,7 +148,7 @@ public class WorldEditor : Editor
     {
         EditorGUI.BeginChangeCheck();
         serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 0.1f, serializedObject.FindProperty("chunkSize").intValue * 0.375f * world.transform.lossyScale.x);
-        serializedObject.FindProperty("targetHeight").intValue = Mathf.Clamp(EditorGUILayout.IntField("Target Height", serializedObject.FindProperty("targetHeight").intValue), 1, serializedObject.FindProperty("chunkSize").intValue * serializedObject.FindProperty("maxHeightIndex").intValue);
+        serializedObject.FindProperty("targetHeight").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Target Height", serializedObject.FindProperty("targetHeight").floatValue), 1, serializedObject.FindProperty("chunkSize").intValue * serializedObject.FindProperty("maxHeightIndex").intValue - 1);
 
         if (GUILayout.Button("Set All") == true)
         {
@@ -279,7 +279,7 @@ public class WorldEditor : Editor
         GUILayout.Label("Resetting Options", boldStyle);
         GUILayout.Label("Warning: changing these options will reset your terrain without undo support");
         serializedObject.FindProperty("chunkSize").intValue = Mathf.Clamp(EditorGUILayout.IntField("Chunk Divisions", serializedObject.FindProperty("chunkSize").intValue), 1, 50);
-        serializedObject.FindProperty("groundHeight").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Ground Height", serializedObject.FindProperty("groundHeight").floatValue), 0, serializedObject.FindProperty("chunkSize").intValue * serializedObject.FindProperty("maxHeightIndex").intValue);
+        serializedObject.FindProperty("groundHeight").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Ground Height", serializedObject.FindProperty("groundHeight").floatValue), 0, serializedObject.FindProperty("chunkSize").intValue * serializedObject.FindProperty("maxHeightIndex").intValue * world.transform.lossyScale.x - 1);
         serializedObject.FindProperty("generateNoise").boolValue = EditorGUILayout.Toggle("Generate Noise", serializedObject.FindProperty("generateNoise").boolValue);
 
         if (serializedObject.FindProperty("generateNoise").boolValue == true)

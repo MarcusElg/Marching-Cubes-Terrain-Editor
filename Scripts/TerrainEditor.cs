@@ -95,6 +95,8 @@ public static class TerrainEditor
             start = 0;
         }
 
+        float extraHeight = world.targetHeight - Mathf.Floor(world.targetHeight);
+
         for (float x = start; x <= world.range; x++)
         {
             for (float z = start; z <= world.range; z++)
@@ -119,7 +121,13 @@ public static class TerrainEditor
                             chunksToUpdate.Add(chunks[i]);
                         }
 
-                        if (y >= world.targetHeight)
+                        if (extraHeight > 0 && y == Mathf.Floor(world.targetHeight))
+                        {
+                            Vector3 position = (new Vector3(offsetedX, 0, offsetedZ) - chunks[i].transform.position) / world.transform.lossyScale.x;
+                            position.y = y - chunks[i].transform.localPosition.y;
+                            chunks[i].SetDensity(world, 1 - extraHeight, position);
+                        }
+                        else if (y >= world.targetHeight)
                         {
                             Vector3 position = (new Vector3(offsetedX, 0, offsetedZ) - chunks[i].transform.position) / world.transform.lossyScale.x;
                             position.y = y - chunks[i].transform.localPosition.y;
