@@ -211,7 +211,6 @@ public class WorldEditor : Editor
     {
         EditorGUI.BeginChangeCheck();
         serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 0.1f, serializedObject.FindProperty("chunkSize").intValue * 0.375f * world.transform.lossyScale.x);
-        serializedObject.FindProperty("roundToNearestPoint").boolValue = EditorGUILayout.Toggle("Round To Nearest Point", serializedObject.FindProperty("roundToNearestPoint").boolValue);
         serializedObject.FindProperty("colour").colorValue = EditorGUILayout.ColorField("Colour", serializedObject.FindProperty("colour").colorValue);
         serializedObject.FindProperty("useColourMask").boolValue = EditorGUILayout.Toggle("Use Colour Mask", serializedObject.FindProperty("useColourMask").boolValue);
 

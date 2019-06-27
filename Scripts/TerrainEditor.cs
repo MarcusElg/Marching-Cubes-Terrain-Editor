@@ -33,8 +33,8 @@ public static class TerrainEditor
 
                     if (!alreadyModifiedPoints.Contains(new Vector3(offsetedX, offsetedY, offsetedZ)))
                     {
-                        float modificationAmount = distance * world.force * buildModifier;
-                        List<Chunk> chunks = world.GetChunks(offsetedX, offsetedY, offsetedZ);
+                        float modificationAmount = world.force * buildModifier;
+                        List<Chunk> chunks = world.GetChunks((new Vector3(offsetedX, offsetedY, offsetedZ) - world.transform.position).RoundToNearestX(world.transform.lossyScale.x) + world.transform.position);
 
                         if (chunks.Count > 0)
                         {
@@ -50,7 +50,6 @@ public static class TerrainEditor
                                 }
 
                                 point2 = (new Vector3(offsetedX, offsetedY, offsetedZ) - chunks[i].transform.position) / world.transform.lossyScale.x;
-
                                 chunks[i].SetDensity(world, newDensity, point2);
                             }
 
@@ -93,7 +92,7 @@ public static class TerrainEditor
 
                 for (int y = 0; y <= world.chunkSize * world.maxHeightIndex; y++)
                 {
-                    List<Chunk> chunks = world.GetChunks(offsetedX, y * world.transform.lossyScale.x + world.transform.position.y, offsetedZ);
+                    List<Chunk> chunks = world.GetChunks((new Vector3(offsetedX, y * world.transform.lossyScale.x + world.transform.position.y, offsetedZ) - world.transform.position).RoundToNearestX(world.transform.lossyScale.x) + world.transform.position);
 
                     for (int i = 0; i < chunks.Count; i++)
                     {
@@ -157,7 +156,7 @@ public static class TerrainEditor
                 for (float y = startY; y <= endY; y++)
                 {
                     Vector3 offsetPosition = position + left * x + Vector3.up * y;
-                    List<Chunk> chunks = world.GetChunks(new Vector3(offsetPosition.x, offsetPosition.y, offsetPosition.z));
+                    List<Chunk> chunks = world.GetChunks((new Vector3(offsetPosition.x, offsetPosition.y, offsetPosition.z) - world.transform.position).RoundToNearestX(world.transform.lossyScale.x) + world.transform.position);
 
                     for (int i = 0; i < chunks.Count; i++)
                     {
@@ -186,7 +185,7 @@ public static class TerrainEditor
                 if (world.clearAbove == true && world.addTerrain == false)
                 {
                     Vector3 offsetPosition = position + left * x;
-                    List<Chunk> chunks = world.GetChunks(new Vector3(offsetPosition.x, offsetPosition.y, offsetPosition.z));
+                    List<Chunk> chunks = world.GetChunks((new Vector3(offsetPosition.x, offsetPosition.y, offsetPosition.z) - world.transform.position).RoundToNearestX(world.transform.lossyScale.x) + world.transform.position);
 
                     for (int i = 0; i < chunks.Count; i++)
                     {
@@ -216,7 +215,7 @@ public static class TerrainEditor
     {
         List<Chunk> chunksToUpdate = new List<Chunk>();
         float[,,] densities = new float[Mathf.CeilToInt(world.range) * 2 + 2, 3, Mathf.CeilToInt(world.range) * 2 + 2];
-        Chunk[,,] chunks = new Chunk[Mathf.CeilToInt(world.range) * 2 + 2, 3, Mathf.CeilToInt(world.range) * 2 + 2];
+        List<Chunk>[,,] chunks = new List<Chunk>[Mathf.CeilToInt(world.range) * 2 + 2, 3, Mathf.CeilToInt(world.range) * 2 + 2];
         Point[,,] points = new Point[Mathf.CeilToInt(world.range) * 2 + 2, 3, Mathf.CeilToInt(world.range) * 2 + 2];
 
         Vector3 left = new Vector3(-up.z, up.y, up.x).normalized;
@@ -229,19 +228,24 @@ public static class TerrainEditor
             {
                 for (int z = -Mathf.CeilToInt(world.range) - 1; z <= world.range; z++)
                 {
-                    Chunk chunk = world.GetChunk(new Vector3(point.x, point.y, point.z) + x * left + y * up + z * forward);
+                    List<Chunk> worldChunks = world.GetChunks(((new Vector3(point.x, point.y, point.z) + x * left + y * up + z * forward) - world.transform.position).RoundToNearestX(world.transform.lossyScale.x) + world.transform.position);
 
-                    if (chunk != null)
+                    if (worldChunks.Count != 0)
                     {
-                        if (!chunksToUpdate.Contains(chunk))
-                        {
-                            chunksToUpdate.Add(chunk);
-                        }
+                        Vector3 localPosition = (new Vector3(point.x, point.y, point.z) + x * left + y * up + z * forward - worldChunks[0].transform.position) / world.transform.lossyScale.x;
+                        densities[x + Mathf.CeilToInt(world.range) + 1, y + 1, z + Mathf.CeilToInt(world.range) + 1] = worldChunks[0].GetPoint(world, localPosition).density;
+                        chunks[x + Mathf.CeilToInt(world.range) + 1, y + 1, z + Mathf.CeilToInt(world.range) + 1] = new List<Chunk>();
+                        points[x + Mathf.CeilToInt(world.range) + 1, y + 1, z + Mathf.CeilToInt(world.range) + 1] = worldChunks[0].GetPoint(world, localPosition);
 
-                        Vector3 localPosition = (new Vector3(point.x, point.y, point.z) + x * left + y * up + z * forward - chunk.transform.position) / world.transform.lossyScale.x;
-                        densities[x + Mathf.CeilToInt(world.range) + 1, y + 1, z + Mathf.CeilToInt(world.range) + 1] = chunk.GetPoint(world, localPosition).density;
-                        chunks[x + Mathf.CeilToInt(world.range) + 1, y + 1, z + Mathf.CeilToInt(world.range) + 1] = chunk;
-                        points[x + Mathf.CeilToInt(world.range) + 1, y + 1, z + Mathf.CeilToInt(world.range) + 1] = chunk.GetPoint(world, localPosition);
+                        for (int i = 0; i < worldChunks.Count; i++)
+                        {
+                            if (!chunksToUpdate.Contains(worldChunks[i]))
+                            {
+                                chunksToUpdate.Add(worldChunks[i]);
+                            }
+
+                            chunks[x + Mathf.CeilToInt(world.range) + 1, y + 1, z + Mathf.CeilToInt(world.range) + 1].Add(worldChunks[i]);
+                        }
                     }
                     else
                     {
@@ -265,7 +269,10 @@ public static class TerrainEditor
                     AddNeighboringPoints(ref totalDensity, ref amountOfDensities, densities, x, 2, z);
 
                     float averageDensity = totalDensity / (amountOfDensities / 3);
-                    chunks[x, 1, z].SetDensity(world, Mathf.Lerp(points[x, 1, z].density, averageDensity, world.force), points[x, 1, z].localPosition);
+                    for (int i = 0; i < chunks[x, 1, z].Count; i++)
+                    {
+                        chunks[x, 1, z][i].SetDensity(world, Mathf.Lerp(points[x, 1, z].density, averageDensity, world.force), points[x, 1, z].localPosition);
+                    }
                 }
             }
         }
@@ -299,18 +306,18 @@ public static class TerrainEditor
 
     public static void PaintTerrain(World world, Vector3 point)
     {
-        if (world.roundToNearestPoint == true)
+        List<Chunk> chunksToUpdate = new List<Chunk>();
+        float start = -world.range;
+        if (world.range < 1)
         {
-            point = (point - world.transform.position).RoundToNearestX(world.transform.lossyScale.x) + world.transform.position;
+            start = 0;
         }
 
-        List<Chunk> chunksToUpdate = new List<Chunk>();
-
-        for (float x = -world.range; x <= world.range; x++)
+        for (float x = start; x <= world.range; x++)
         {
-            for (float y = Mathf.Min(-world.range, -1); y <= Mathf.Max(world.range, 1); y++)
+            for (float y = start; y <= world.range; y++)
             {
-                for (float z = -world.range; z <= world.range; z++)
+                for (float z = start; z <= world.range; z++)
                 {
                     float offsetedX = point.x - x;
                     float offsetedY = point.y - y;
@@ -322,7 +329,7 @@ public static class TerrainEditor
                         continue;
                     }
 
-                    List<Chunk> chunks = world.GetChunks(offsetedX, offsetedY, offsetedZ);
+                    List<Chunk> chunks = world.GetChunks((new Vector3(offsetedX, offsetedY, offsetedZ) - world.transform.position).RoundToNearestX(world.transform.lossyScale.x) + world.transform.position);
 
                     for (int i = 0; i < chunks.Count; i++)
                     {
