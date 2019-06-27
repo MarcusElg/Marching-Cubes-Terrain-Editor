@@ -42,8 +42,8 @@ public class Chunk : MonoBehaviour
 
     public void ResetCollider(World world)
     {
-        transform.GetChild(0).GetComponent<BoxCollider>().center = new Vector3(world.chunkSize * world.transform.lossyScale.x / 4, world.chunkSize * world.transform.lossyScale.x / 4, world.chunkSize * world.transform.lossyScale.x / 4);
-        transform.GetChild(0).GetComponent<BoxCollider>().size = new Vector3(world.chunkSize * world.transform.lossyScale.x / 2, world.chunkSize * world.transform.lossyScale.x / 2, world.chunkSize * world.transform.lossyScale.x / 2);
+        transform.GetChild(0).GetComponent<BoxCollider>().center = new Vector3(world.chunkSize / 2, world.chunkSize / 2, world.chunkSize / 2);
+        transform.GetChild(0).GetComponent<BoxCollider>().size = new Vector3(world.chunkSize, world.chunkSize, world.chunkSize);
     }
 
     public void ResetPoints(World world)
