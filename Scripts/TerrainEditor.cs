@@ -13,6 +13,7 @@ public static class TerrainEditor
         Vector3 hitPos = new Vector3(hitX, hitY, hitZ);
 
         List<Chunk> chunksToUpdate = new List<Chunk>();
+        List<Vector3> alreadyModifiedPoints = new List<Vector3>();
 
         for (float x = -world.range; x <= world.range; x++)
         {
@@ -30,21 +31,34 @@ public static class TerrainEditor
                         continue;
                     }
 
-                    float modificationAmount = distance * world.force * buildModifier;
-                    List<Chunk> chunks = world.GetChunks(offsetedX, offsetedY, offsetedZ);
-
-                    for (int i = 0; i < chunks.Count; i++)
+                    if (!alreadyModifiedPoints.Contains(new Vector3(offsetedX, offsetedY, offsetedZ)))
                     {
-                        if (!chunksToUpdate.Contains(chunks[i]))
-                        {
-                            chunksToUpdate.Add(chunks[i]);
-                        }
+                        float modificationAmount = distance * world.force * buildModifier;
+                        List<Chunk> chunks = world.GetChunks(offsetedX, offsetedY, offsetedZ);
 
-                        Vector3 point2 = (new Vector3(offsetedX, offsetedY, offsetedZ) - chunks[i].transform.position) / world.transform.lossyScale.x;
-                        float oldDensity = world.GetPoint(new Vector3Int(Mathf.RoundToInt(point2.x), Mathf.RoundToInt(point2.y), Mathf.RoundToInt(point2.z))).density;
-                        float newDensity = oldDensity + modificationAmount;
-                        newDensity = newDensity.Clamp01();
-                        chunks[i].SetDensity(world, newDensity, point2);
+                        if (chunks.Count > 0)
+                        {
+                            Vector3 point2 = (new Vector3(offsetedX, offsetedY, offsetedZ) - chunks[0].transform.position) / world.transform.lossyScale.x;
+                            float oldDensity = world.GetPoint(new Vector3Int(Mathf.RoundToInt(point2.x), Mathf.RoundToInt(point2.y), Mathf.RoundToInt(point2.z))).density;
+                            float newDensity = (oldDensity + modificationAmount).Clamp01();
+
+                            for (int i = 0; i < chunks.Count; i++)
+                            {
+                                if (!chunksToUpdate.Contains(chunks[i]))
+                                {
+                                    chunksToUpdate.Add(chunks[i]);
+                                }
+
+                                point2 = (new Vector3(offsetedX, offsetedY, offsetedZ) - chunks[i].transform.position) / world.transform.lossyScale.x;
+
+                                chunks[i].SetDensity(world, newDensity, point2);
+                            }
+
+                            if (chunks.Count > 1)
+                            {
+                                alreadyModifiedPoints.Add(new Vector3(offsetedX, offsetedY, offsetedZ));
+                            }
+                        }
                     }
                 }
             }

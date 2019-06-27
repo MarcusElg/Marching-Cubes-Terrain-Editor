@@ -28,11 +28,11 @@ public class MarchingCubes
 
     private Vector3 VertexInterpolate(Vector3 p1, Vector3 p2, float v1, float v2)
     {
-        if (Utils.Abs(0.5f - v1) < 0.03f)
+        if (Utils.Abs(0.9f - v1) < 0.03f)
         {
             return p1;
         }
-        if (Utils.Abs(0.5f - v2) < 0.03f)
+        if (Utils.Abs(0.9f - v2) < 0.03f)
         {
             return p2;
         }
@@ -41,7 +41,7 @@ public class MarchingCubes
             return p1;
         }
 
-        float mu = (0.5f - v1) / (v2 - v1);
+        float mu = (0.9f - v1) / (v2 - v1);
 
         Vector3 p = p1 + mu * (p2 - p1);
 
