@@ -30,7 +30,7 @@ public static class TerrainEditor
                         continue;
                     }
 
-                    float modificationAmount = distance * world.forceOverDistance.Evaluate(1 - distance.Map(0, world.force, 0, 1)) * buildModifier;
+                    float modificationAmount = distance * world.force * buildModifier;
                     List<Chunk> chunks = world.GetChunks(offsetedX, offsetedY, offsetedZ);
 
                     for (int i = 0; i < chunks.Count; i++)

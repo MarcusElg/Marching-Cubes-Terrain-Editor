@@ -7,7 +7,6 @@ public class World : MonoBehaviour
     /// Modify
     public float range = 2;
     public float force = 2f;
-    public AnimationCurve forceOverDistance = AnimationCurve.Constant(0, 1, 1);
 
     // Set
     public int targetHeight = 10;

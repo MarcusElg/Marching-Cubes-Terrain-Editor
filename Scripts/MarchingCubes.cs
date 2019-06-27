@@ -106,7 +106,7 @@ public class MarchingCubes
         int cubeIndex = 0;
 
         for (int i = 0; i < 8; i++)
-            if (points[i].density < 0.5f)
+            if (points[i].density < 0.9f)
                 cubeIndex |= 1 << i;
 
         return cubeIndex;
