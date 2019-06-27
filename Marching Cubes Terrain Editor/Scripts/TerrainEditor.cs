@@ -41,7 +41,7 @@ public static class TerrainEditor
                         Vector3 position = (new Vector3(offsetedX, offsetedY - 1, offsetedZ) - world.transform.position).RoundToNearestX(world.transform.lossyScale.x) + world.transform.position;
                         if (addTerrain == true)
                         {
-                            position.y = (offsetedY - world.transform.position.y).CeilToNearestX(world.transform.lossyScale.x) + world.transform.position.y;
+                            position.y = (offsetedY - world.transform.position.y).FloorToNearestX(world.transform.lossyScale.x) + world.transform.position.y + world.transform.lossyScale.x;
                         }
                         else
                         {
@@ -53,7 +53,7 @@ public static class TerrainEditor
                         if (chunks != null && chunks.Count > 0)
                         {
                             Vector3 point2 = (position - chunks[0].transform.position) / world.transform.lossyScale.x;
-                            float oldDensity = world.GetPoint(new Vector3Int(Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.y), Mathf.RoundToInt(position.z))).density;
+                            float oldDensity = chunks[0].GetPoint(world, point2).density;
                             float newDensity = (oldDensity + modificationAmount).Clamp01();
 
                             for (int i = 0; i < chunks.Count; i++)
@@ -64,7 +64,6 @@ public static class TerrainEditor
                                 }
 
                                 point2 = (position - chunks[i].transform.position) / world.transform.lossyScale.x;
-
                                 chunks[i].SetDensity(world, newDensity, point2);
                             }
 

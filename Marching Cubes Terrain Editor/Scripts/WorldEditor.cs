@@ -279,7 +279,7 @@ public class WorldEditor : Editor
         GUILayout.Label("Resetting Options", boldStyle);
         GUILayout.Label("Warning: changing these options will reset your terrain without undo support");
         serializedObject.FindProperty("chunkSize").intValue = Mathf.Clamp(EditorGUILayout.IntField("Chunk Divisions", serializedObject.FindProperty("chunkSize").intValue), 1, 50);
-        serializedObject.FindProperty("groundHeight").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Ground Height", serializedObject.FindProperty("groundHeight").floatValue), 0, serializedObject.FindProperty("chunkSize").intValue * serializedObject.FindProperty("maxHeightIndex").intValue * world.transform.lossyScale.x - 1);
+        serializedObject.FindProperty("groundHeight").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Ground Height", serializedObject.FindProperty("groundHeight").floatValue), 0, serializedObject.FindProperty("chunkSize").intValue * serializedObject.FindProperty("maxHeightIndex").intValue - 1);
         serializedObject.FindProperty("generateNoise").boolValue = EditorGUILayout.Toggle("Generate Noise", serializedObject.FindProperty("generateNoise").boolValue);
 
         if (serializedObject.FindProperty("generateNoise").boolValue == true)
