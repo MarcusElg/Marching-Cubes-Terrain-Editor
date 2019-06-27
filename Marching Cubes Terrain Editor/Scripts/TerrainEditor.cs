@@ -248,7 +248,7 @@ public static class TerrainEditor
         List<Chunk> chunksToUpdate = new List<Chunk>();
         float[,,] densities = new float[Mathf.CeilToInt(world.range) * 2 + 2, 3, Mathf.CeilToInt(world.range) * 2 + 2];
         List<Chunk>[,,] chunks = new List<Chunk>[Mathf.CeilToInt(world.range) * 2 + 2, 3, Mathf.CeilToInt(world.range) * 2 + 2];
-        Point[,,] points = new Point[Mathf.CeilToInt(world.range) * 2 + 2, 3, Mathf.CeilToInt(world.range) * 2 + 2];
+        CubePoint[,,] points = new CubePoint[Mathf.CeilToInt(world.range) * 2 + 2, 3, Mathf.CeilToInt(world.range) * 2 + 2];
 
         Vector3 left = new Vector3(-up.z, up.y, up.x).normalized;
         Vector3 forward = new Vector3(left.x, left.y, -left.z).normalized;

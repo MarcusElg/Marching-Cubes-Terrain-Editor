@@ -10,18 +10,18 @@ public class MarchingCubes
     private int _vertexIndex;
 
     private Vector3[] _vertexList;
-    private Point[] _initPoints;
+    private CubePoint[] _initPoints;
     private Mesh _mesh;
     private int[,,] _cubeIndexes;
 
     private readonly Vector3 zero = Vector3.zero;
 
-    public MarchingCubes(World world, Point[] points, int seed)
+    public MarchingCubes(World world, CubePoint[] points, int seed)
     {
         _mesh = new Mesh();
         _vertexIndex = 0;
         _vertexList = new Vector3[12];
-        _initPoints = new Point[8];
+        _initPoints = new CubePoint[8];
         int amount = world.chunkSize + 1;
         _cubeIndexes = new int[amount, amount, amount];
     }
@@ -47,7 +47,7 @@ public class MarchingCubes
         return p;
     }
 
-    private void March(Point[] points, int cubeIndex)
+    private void March(CubePoint[] points, int cubeIndex)
     {
         int edgeIndex = LookupTables.EdgeTable[cubeIndex];
 
@@ -79,7 +79,7 @@ public class MarchingCubes
         }
     }
 
-    private Vector3[] GenerateVertexList(Point[] points, int edgeIndex, ref Color[] colours2)
+    private Vector3[] GenerateVertexList(CubePoint[] points, int edgeIndex, ref Color[] colours2)
     {
         for (int i = 0; i < 12; i++)
         {
@@ -89,8 +89,8 @@ public class MarchingCubes
                 int edge1 = edgePair[0];
                 int edge2 = edgePair[1];
 
-                Point point1 = points[edge1];
-                Point point2 = points[edge2];
+                CubePoint point1 = points[edge1];
+                CubePoint point2 = points[edge2];
 
                 _vertexList[i] = VertexInterpolate(point1.localPosition, point2.localPosition, point1.density, point2.density);
                 colours2[i] = new Color(Mathf.Lerp(point1.colour.r, point2.colour.r, 0.5f), Mathf.Lerp(point1.colour.g, point2.colour.g, 0.5f), Mathf.Lerp(point1.colour.b, point1.colour.b, 0.5f), Mathf.Lerp(point1.colour.a, point1.colour.a, 0.5f));
@@ -100,7 +100,7 @@ public class MarchingCubes
         return _vertexList;
     }
 
-    private int CalculateCubeIndex(Point[] points)
+    private int CalculateCubeIndex(CubePoint[] points)
     {
         int cubeIndex = 0;
 
@@ -111,7 +111,7 @@ public class MarchingCubes
         return cubeIndex;
     }
 
-    public Mesh CreateMeshData(World world, Point[] points)
+    public Mesh CreateMeshData(World world, CubePoint[] points)
     {
         _cubeIndexes = GenerateCubeIndexes(world, points);
         int vertexCount = GenerateVertexCount(_cubeIndexes);
@@ -134,7 +134,7 @@ public class MarchingCubes
                     int cubeIndex = _cubeIndexes[x, y, z];
                     if (cubeIndex == 0 || cubeIndex == 255) continue;
 
-                    Point[] points2 = GetPoints(world, x, y, z, points);
+                    CubePoint[] points2 = GetPoints(world, x, y, z, points);
                     March(points2, cubeIndex);
                 }
             }
@@ -151,18 +151,18 @@ public class MarchingCubes
         return _mesh;
     }
 
-    private Point[] GetPoints(World world, int x, int y, int z, Point[] points)
+    private CubePoint[] GetPoints(World world, int x, int y, int z, CubePoint[] points)
     {
         for (int i = 0; i < 8; i++)
         {
-            Point p = points[x + CubePointsX[i] + (world.chunkSize + 1) * (y + CubePointsY[i] + (z + CubePointsZ[i]) * (world.chunkSize + 1))];
-            _initPoints[i] = p;
+            CubePoint point = points[x + CubePointsX[i] + (world.chunkSize + 1) * (y + CubePointsY[i] + (z + CubePointsZ[i]) * (world.chunkSize + 1))];
+            _initPoints[i] = point;
         }
 
         return _initPoints;
     }
 
-    private int[,,] GenerateCubeIndexes(World world, Point[] points)
+    private int[,,] GenerateCubeIndexes(World world, CubePoint[] points)
     {
         for (int x = 0; x < world.chunkSize; x++)
         {

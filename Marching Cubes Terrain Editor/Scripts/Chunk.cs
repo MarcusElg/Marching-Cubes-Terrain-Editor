@@ -5,7 +5,7 @@ public class Chunk : MonoBehaviour
 
     [SerializeField]
     [HideInInspector]
-    public Point[] points;
+    public CubePoint[] points;
     public Vector3Int chunkIndex;
 
     public MarchingCubes _marchingCubes;
@@ -50,7 +50,7 @@ public class Chunk : MonoBehaviour
     {
         UpdateAfterReload(world);
 
-        points = new Point[(int)Mathf.Pow(world.chunkSize + 1, 3)];
+        points = new CubePoint[(int)Mathf.Pow(world.chunkSize + 1, 3)];
 
         for (int x = 0; x < world.chunkSize + 1; x++)
         {
@@ -58,7 +58,7 @@ public class Chunk : MonoBehaviour
             {
                 for (int z = 0; z < world.chunkSize + 1; z++)
                 {
-                    points[x + (world.chunkSize + 1) * (y + z * (world.chunkSize + 1))] = new Point(new Vector3Int(x, y, z), _densityGenerator.CalculateDensity(world, world.transform.lossyScale.x * x + transform.position.x, world.transform.lossyScale.x * y + transform.position.y, world.transform.lossyScale.x * z + transform.position.z), Color.green);
+                    points[x + (world.chunkSize + 1) * (y + z * (world.chunkSize + 1))] = new CubePoint(new Vector3Int(x, y, z), _densityGenerator.CalculateDensity(world, world.transform.lossyScale.x * x + transform.position.x, world.transform.lossyScale.x * y + transform.position.y, world.transform.lossyScale.x * z + transform.position.z), Color.green);
                 }
             }
         }
@@ -83,17 +83,17 @@ public class Chunk : MonoBehaviour
         GetComponent<MeshCollider>().sharedMesh = mesh;
     }
 
-    public Point GetPoint(World world, Vector3 pos)
+    public CubePoint GetPoint(World world, Vector3 pos)
     {
         return GetPoint(world, Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y), Mathf.RoundToInt(pos.z));
     }
 
-    public Point GetPoint(World world, Vector3Int pos)
+    public CubePoint GetPoint(World world, Vector3Int pos)
     {
         return GetPoint(world, pos.x, pos.y, pos.z);
     }
 
-    public Point GetPoint(World world, int x, int y, int z)
+    public CubePoint GetPoint(World world, int x, int y, int z)
     {
         return points[x + (world.chunkSize + 1) * (y + z * (world.chunkSize + 1))];
     }

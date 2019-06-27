@@ -154,17 +154,17 @@ public class World : MonoBehaviour
         return chunks;
     }
 
-    public Point GetPoint(Vector3 pos)
+    public CubePoint GetPoint(Vector3 pos)
     {
         return GetPoint(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y), Mathf.RoundToInt(pos.z));
     }
 
-    public Point GetPoint(Vector3Int pos)
+    public CubePoint GetPoint(Vector3Int pos)
     {
         return GetPoint(pos.x, pos.y, pos.z);
     }
 
-    public Point GetPoint(int x, int y, int z)
+    public CubePoint GetPoint(int x, int y, int z)
     {
         Chunk chunk = GetChunk(x, y, z);
 
@@ -180,7 +180,7 @@ public class World : MonoBehaviour
         }
         else
         {
-            return new Point(new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue), 0, Color.green);
+            return new CubePoint(new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue), 0, Color.green);
         }
     }
 

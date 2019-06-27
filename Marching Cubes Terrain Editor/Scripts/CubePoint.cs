@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
 
 [System.Serializable]
-public struct Point
+public struct CubePoint
 {
     public Vector3Int localPosition;
     public float density;
     public Color colour;
 
-    public Point(Vector3Int localPosition, float density, Color colour)
+    public CubePoint(Vector3Int localPosition, float density, Color colour)
     {
         this.localPosition = localPosition;
         this.density = density;
