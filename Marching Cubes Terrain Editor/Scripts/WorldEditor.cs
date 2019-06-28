@@ -386,7 +386,7 @@ public class WorldEditor : Editor
                         }
                         else if (middleButtonDown == true)
                         {
-                            world.targetHeight = Mathf.RoundToInt(raycastHit.point.y - raycastHit.transform.position.y);
+                            world.targetHeight = (raycastHit.point.y - raycastHit.transform.position.y) / world.transform.lossyScale.x + 0.5f;
                         }
                     }
                     else if (world.terrainMode == World.TerrainMode.Line)
