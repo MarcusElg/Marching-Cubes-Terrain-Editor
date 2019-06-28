@@ -137,6 +137,7 @@ public class WorldEditor : Editor
 
         serializedObject.FindProperty("range").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Range", serializedObject.FindProperty("range").floatValue), 1f, serializedObject.FindProperty("chunkSize").intValue * 0.375f * world.transform.lossyScale.x);
         serializedObject.FindProperty("force").floatValue = Mathf.Clamp(EditorGUILayout.FloatField("Force", serializedObject.FindProperty("force").floatValue), 0.01f, 1f);
+        serializedObject.FindProperty("alwaysFaceUpwards").boolValue = EditorGUILayout.Toggle("Always Face Upwards", serializedObject.FindProperty("alwaysFaceUpwards").boolValue);
 
         if (EditorGUI.EndChangeCheck() == true || apply == true)
         {
@@ -386,7 +387,15 @@ public class WorldEditor : Editor
                         if (world.terrainMode == World.TerrainMode.Modify)
                         {
                             Handles.color = Color.white;
-                            Handles.DrawWireDisc(raycastHit.point, raycastHit.normal, world.range);
+
+                            if (world.alwaysFaceUpwards == true)
+                            {
+                                Handles.DrawWireDisc(raycastHit.point, Vector3.up, world.range);
+                            }
+                            else
+                            {
+                                Handles.DrawWireDisc(raycastHit.point, raycastHit.normal, world.range);
+                            }
 
                             if ((leftButtonDown == true || rightButtonDown == true) && (Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag))
                             {
@@ -397,7 +406,14 @@ public class WorldEditor : Editor
                                     raise = false;
                                 }
 
-                                TerrainEditor.ModifyTerrain(world, raycastHit.point, raise);
+                                if (world.alwaysFaceUpwards == true)
+                                {
+                                    TerrainEditor.ModifyTerrain(world, raycastHit.point, Vector3.up, raise);
+                                }
+                                else
+                                {
+                                    TerrainEditor.ModifyTerrain(world, raycastHit.point, raycastHit.normal, raise);
+                                }
                             }
                         }
                         else if (world.terrainMode == World.TerrainMode.Set)

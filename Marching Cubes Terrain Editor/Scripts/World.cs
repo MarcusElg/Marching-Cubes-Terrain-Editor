@@ -7,6 +7,7 @@ public class World : MonoBehaviour
     /// Modify
     public float range = 2;
     public float force = 2f;
+    public bool alwaysFaceUpwards = false;
 
     // Set
     public float targetHeight = 10f;

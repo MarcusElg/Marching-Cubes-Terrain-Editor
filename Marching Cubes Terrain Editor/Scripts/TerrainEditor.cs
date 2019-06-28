@@ -4,8 +4,10 @@ using UnityEngine;
 public static class TerrainEditor
 {
 
-    public static void ModifyTerrain(World world, Vector3 point, bool addTerrain)
+    public static void ModifyTerrain(World world, Vector3 point, Vector3 up, bool addTerrain)
     {
+        Vector3 left = new Vector3(-up.y, up.z, up.x).normalized;
+        Vector3 forward = new Vector3(left.z, left.y, -left.x).normalized;
         int buildModifier = addTerrain ? -1 : 1;
 
         List<Chunk> chunksToUpdate = new List<Chunk>();
@@ -19,58 +21,50 @@ public static class TerrainEditor
 
         for (float x = start; x <= world.range; x++)
         {
-            for (float y = start; y <= world.range; y++)
+            for (float z = start; z <= world.range; z++)
             {
-                for (float z = start; z <= world.range; z++)
+                Vector3 position = (point + left * x + forward * z - world.transform.position).RoundToNearestX(world.transform.lossyScale.x) + world.transform.position;
+
+                float distance = Vector3.Distance(position, (point - world.transform.position).RoundToNearestX(world.transform.lossyScale.x) + world.transform.position);
+                if (!(distance <= world.range))
                 {
-                    float offsetedX = point.x - x;
-                    float offsetedY = point.y - y;
-                    float offsetedZ = point.z - z;
+                    continue;
+                }
 
-                    float distance = Utils.Distance(offsetedX, offsetedY, offsetedZ, point);
-                    if (!(distance <= world.range))
+                if (addTerrain == true)
+                {
+                    position.y = (point + left * x + forward * z - world.transform.position).y.CeilToNearestX(world.transform.lossyScale.x) + world.transform.position.y;
+                }
+                else
+                {
+                    position.y = (point + left * x + forward * z - world.transform.position).y.FloorToNearestX(world.transform.lossyScale.x) + world.transform.position.y;
+                }
+
+                if (!alreadyModifiedPoints.Contains(point + left * x + forward * z))
+                {
+                    float modificationAmount = world.force * buildModifier * (1 - (distance / world.range));
+                    List<Chunk> chunks = world.GetChunks(position);
+
+                    if (chunks != null && chunks.Count > 0)
                     {
-                        continue;
-                    }
+                        Vector3 point2 = (position - chunks[0].transform.position) / world.transform.lossyScale.x;
+                        float oldDensity = chunks[0].GetPoint(world, point2).density;
+                        float newDensity = (oldDensity + modificationAmount).Clamp01();
 
-                    if (!alreadyModifiedPoints.Contains(new Vector3(offsetedX, offsetedY, offsetedZ)))
-                    {
-                        float modificationAmount = world.force * buildModifier;
-                        List<Chunk> chunks = null;
-
-                        Vector3 position = (new Vector3(offsetedX, offsetedY - 1, offsetedZ) - world.transform.position).RoundToNearestX(world.transform.lossyScale.x) + world.transform.position;
-                        if (addTerrain == true)
+                        for (int i = 0; i < chunks.Count; i++)
                         {
-                            position.y = (offsetedY - world.transform.position.y).FloorToNearestX(world.transform.lossyScale.x) + world.transform.position.y + world.transform.lossyScale.x;
-                        }
-                        else
-                        {
-                            position.y = (offsetedY - world.transform.position.y).FloorToNearestX(world.transform.lossyScale.x) + world.transform.position.y;
-                        }
-
-                        chunks = world.GetChunks(position);
-
-                        if (chunks != null && chunks.Count > 0)
-                        {
-                            Vector3 point2 = (position - chunks[0].transform.position) / world.transform.lossyScale.x;
-                            float oldDensity = chunks[0].GetPoint(world, point2).density;
-                            float newDensity = (oldDensity + modificationAmount).Clamp01();
-
-                            for (int i = 0; i < chunks.Count; i++)
+                            if (!chunksToUpdate.Contains(chunks[i]))
                             {
-                                if (!chunksToUpdate.Contains(chunks[i]))
-                                {
-                                    chunksToUpdate.Add(chunks[i]);
-                                }
-
-                                point2 = (position - chunks[i].transform.position) / world.transform.lossyScale.x;
-                                chunks[i].SetDensity(world, newDensity, point2);
+                                chunksToUpdate.Add(chunks[i]);
                             }
 
-                            if (chunks.Count > 1)
-                            {
-                                alreadyModifiedPoints.Add(new Vector3(offsetedX, offsetedY, offsetedZ));
-                            }
+                            point2 = (position - chunks[i].transform.position) / world.transform.lossyScale.x;
+                            chunks[i].SetDensity(world, newDensity, point2);
+                        }
+
+                        if (chunks.Count > 1)
+                        {
+                            alreadyModifiedPoints.Add(point + left * x + forward * z);
                         }
                     }
                 }
