@@ -30,7 +30,6 @@ public class World : MonoBehaviour
 
     public bool randomizeSeed = true;
     public int seed;
-    public GameObject chunkPrefab;
     public bool generateNoise = true;
     public float noiseScale = 1;
     public float noiseStretch = 1;
@@ -197,7 +196,7 @@ public class World : MonoBehaviour
 
         if (spaceEmpty == true)
         {
-            Chunk chunk = Instantiate(chunkPrefab).GetComponent<Chunk>();
+            Chunk chunk = new GameObject().AddComponent<Chunk>();
             chunk.transform.localPosition = new Vector3(x * chunkSize, y * chunkSize, z * chunkSize);
             chunk.Initialize(this, new Vector3Int(x, y, z));
             chunk.Generate(this);

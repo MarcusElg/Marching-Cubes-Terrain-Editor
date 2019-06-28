@@ -13,6 +13,11 @@ public class Chunk : MonoBehaviour
 
     public void Initialize(World world, Vector3Int chunkIndex)
     {
+        gameObject.AddComponent<MeshFilter>();
+        gameObject.AddComponent<MeshRenderer>();
+        gameObject.GetComponent<MeshRenderer>().sharedMaterial = Resources.Load("Materials/Marching Cubes Terrain") as Material;
+        gameObject.AddComponent<MeshCollider>();
+
         transform.SetParent(world.transform, false);
         transform.localScale = Vector3.one;
         name = chunkIndex.ToString();

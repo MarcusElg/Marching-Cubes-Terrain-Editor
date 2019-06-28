@@ -294,8 +294,6 @@ public class WorldEditor : Editor
             }
         }
 
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("chunkPrefab"), new GUIContent("Chunk Prefab"));
-
         if (EditorGUI.EndChangeCheck() == true)
         {
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
