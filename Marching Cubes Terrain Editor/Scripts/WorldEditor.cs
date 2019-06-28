@@ -301,6 +301,31 @@ public class WorldEditor : Editor
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
             ResetTerrain();
         }
+
+        GUILayout.Space(20);
+        GUILayout.Label("Non-resetting Options", boldStyle);
+        EditorGUI.BeginChangeCheck();
+        serializedObject.FindProperty("editMode").boolValue = EditorGUILayout.Toggle("Edit Mode", serializedObject.FindProperty("editMode").boolValue);
+
+        if (EditorGUI.EndChangeCheck() == true)
+        {
+            serializedObject.ApplyModifiedPropertiesWithoutUndo();
+
+            if (serializedObject.FindProperty("editMode").boolValue == true)
+            {
+                for (int i = 0; i < world.transform.childCount; i++)
+                {
+                    world.transform.GetChild(i).GetChild(0).GetComponent<BoxCollider>().enabled = true;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < world.transform.childCount; i++)
+                {
+                    world.transform.GetChild(i).GetChild(0).GetComponent<BoxCollider>().enabled = false;
+                }
+            }
+        }
     }
 
     private void OnSceneGUI()
@@ -349,100 +374,103 @@ public class WorldEditor : Editor
             }
         }
 
-        if ((Event.current.shift == false || world.terrainMode == World.TerrainMode.Line))
+        if (world.editMode == true)
         {
-            // Brushes
-            if (Physics.Raycast(ray, out raycastHit, 1000, LayerMask.GetMask("Chunk")))
+            if ((Event.current.shift == false || world.terrainMode == World.TerrainMode.Line))
             {
-                if (raycastHit.transform.GetComponent<Chunk>() != null)
+                // Brushes
+                if (Physics.Raycast(ray, out raycastHit, 1000, LayerMask.GetMask("Chunk")))
                 {
-                    World world = raycastHit.transform.parent.GetComponent<World>();
-
-                    if (world.terrainMode == World.TerrainMode.Modify)
+                    if (raycastHit.transform.GetComponent<Chunk>() != null)
                     {
-                        Handles.color = Color.white;
-                        Handles.DrawWireDisc(raycastHit.point, raycastHit.normal, world.range);
+                        World world = raycastHit.transform.parent.GetComponent<World>();
 
-                        if ((leftButtonDown == true || rightButtonDown == true) && (Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag))
+                        if (world.terrainMode == World.TerrainMode.Modify)
                         {
-                            bool raise = true;
+                            Handles.color = Color.white;
+                            Handles.DrawWireDisc(raycastHit.point, raycastHit.normal, world.range);
 
-                            if (rightButtonDown == true)
+                            if ((leftButtonDown == true || rightButtonDown == true) && (Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag))
                             {
-                                raise = false;
+                                bool raise = true;
+
+                                if (rightButtonDown == true)
+                                {
+                                    raise = false;
+                                }
+
+                                TerrainEditor.ModifyTerrain(world, raycastHit.point, raise);
+                            }
+                        }
+                        else if (world.terrainMode == World.TerrainMode.Set)
+                        {
+                            Handles.color = Color.white;
+                            Handles.DrawWireDisc(raycastHit.point, Vector3.up, world.range);
+
+                            if (leftButtonDown == true && (Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag))
+                            {
+                                TerrainEditor.SetTerrain(world, raycastHit.point);
+                            }
+                            else if (middleButtonDown == true)
+                            {
+                                world.targetHeight = (raycastHit.point.y - raycastHit.transform.position.y) / world.transform.lossyScale.x + 0.5f;
+                            }
+                        }
+                        else if (world.terrainMode == World.TerrainMode.Line)
+                        {
+                            if (world.startPosition != new Vector3(float.MaxValue, float.MaxValue, float.MaxValue) && world.endPosition != new Vector3(float.MaxValue, float.MaxValue, float.MaxValue))
+                            {
+                                Vector3 forward = world.startPosition - world.endPosition;
+                                Vector3 left = new Vector3(-forward.z, 0, forward.x).normalized;
+
+                                Handles.zTest = UnityEngine.Rendering.CompareFunction.Less;
+                                Handles.color = world.settings.FindProperty("linePreviewColour").colorValue;
+                                Handles.DrawLine(world.startPosition - left * world.range, world.endPosition - left * world.range / 2);
+                                Handles.DrawLine(world.startPosition + left * world.range, world.endPosition + left * world.range / 2);
+                                Handles.zTest = UnityEngine.Rendering.CompareFunction.Disabled;
                             }
 
-                            TerrainEditor.ModifyTerrain(world, raycastHit.point, raise);
+                            if (Event.current.shift == false)
+                            {
+                                if (leftButtonDown == true)
+                                {
+                                    world.startPosition = raycastHit.point;
+                                }
+                                else if (rightButtonDown == true)
+                                {
+                                    world.endPosition = raycastHit.point;
+                                }
+                            }
                         }
-                    }
-                    else if (world.terrainMode == World.TerrainMode.Set)
-                    {
-                        Handles.color = Color.white;
-                        Handles.DrawWireDisc(raycastHit.point, Vector3.up, world.range);
+                        else if (world.terrainMode == World.TerrainMode.Smooth)
+                        {
+                            Handles.color = Color.white;
+                            Handles.DrawWireDisc(raycastHit.point, (ray.origin - raycastHit.point).normalized, world.range);
 
-                        if (leftButtonDown == true && (Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag))
-                        {
-                            TerrainEditor.SetTerrain(world, raycastHit.point);
-                        }
-                        else if (middleButtonDown == true)
-                        {
-                            world.targetHeight = (raycastHit.point.y - raycastHit.transform.position.y) / world.transform.lossyScale.x + 0.5f;
-                        }
-                    }
-                    else if (world.terrainMode == World.TerrainMode.Line)
-                    {
-                        if (world.startPosition != new Vector3(float.MaxValue, float.MaxValue, float.MaxValue) && world.endPosition != new Vector3(float.MaxValue, float.MaxValue, float.MaxValue))
-                        {
-                            Vector3 forward = world.startPosition - world.endPosition;
-                            Vector3 left = new Vector3(-forward.z, 0, forward.x).normalized;
-
-                            Handles.zTest = UnityEngine.Rendering.CompareFunction.Less;
-                            Handles.color = world.settings.FindProperty("linePreviewColour").colorValue;
-                            Handles.DrawLine(world.startPosition - left * world.range, world.endPosition - left * world.range / 2);
-                            Handles.DrawLine(world.startPosition + left * world.range, world.endPosition + left * world.range / 2);
-                            Handles.zTest = UnityEngine.Rendering.CompareFunction.Disabled;
-                        }
-
-                        if (Event.current.shift == false)
-                        {
                             if (leftButtonDown == true)
                             {
-                                world.startPosition = raycastHit.point;
-                            }
-                            else if (rightButtonDown == true)
-                            {
-                                world.endPosition = raycastHit.point;
+                                TerrainEditor.SmoothTerrain(world, raycastHit.point, (ray.origin - raycastHit.point).normalized);
                             }
                         }
-                    }
-                    else if (world.terrainMode == World.TerrainMode.Smooth)
-                    {
-                        Handles.color = Color.white;
-                        Handles.DrawWireDisc(raycastHit.point, (ray.origin - raycastHit.point).normalized, world.range);
+                        else if (world.terrainMode == World.TerrainMode.Paint)
+                        {
+                            Handles.color = Color.white;
+                            Handles.DrawWireDisc(raycastHit.point, raycastHit.normal, world.range);
 
-                        if (leftButtonDown == true)
-                        {
-                            TerrainEditor.SmoothTerrain(world, raycastHit.point, (ray.origin - raycastHit.point).normalized);
-                        }
-                    }
-                    else if (world.terrainMode == World.TerrainMode.Paint)
-                    {
-                        Handles.color = Color.white;
-                        Handles.DrawWireDisc(raycastHit.point, raycastHit.normal, world.range);
-
-                        if (leftButtonDown == true && (Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag))
-                        {
-                            TerrainEditor.PaintTerrain(world, raycastHit.point);
-                        }
-                        else if (middleButtonDown == true)
-                        {
-                            if (Event.current.control == true)
+                            if (leftButtonDown == true && (Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag))
                             {
-                                world.colourMask = raycastHit.transform.GetComponent<MeshFilter>().sharedMesh.colors[raycastHit.transform.GetComponent<MeshFilter>().sharedMesh.triangles[raycastHit.triangleIndex * 3]];
+                                TerrainEditor.PaintTerrain(world, raycastHit.point);
                             }
-                            else
+                            else if (middleButtonDown == true)
                             {
-                                world.colour = raycastHit.transform.GetComponent<MeshFilter>().sharedMesh.colors[raycastHit.transform.GetComponent<MeshFilter>().sharedMesh.triangles[raycastHit.triangleIndex * 3]];
+                                if (Event.current.control == true)
+                                {
+                                    world.colourMask = raycastHit.transform.GetComponent<MeshFilter>().sharedMesh.colors[raycastHit.transform.GetComponent<MeshFilter>().sharedMesh.triangles[raycastHit.triangleIndex * 3]];
+                                }
+                                else
+                                {
+                                    world.colour = raycastHit.transform.GetComponent<MeshFilter>().sharedMesh.colors[raycastHit.transform.GetComponent<MeshFilter>().sharedMesh.triangles[raycastHit.triangleIndex * 3]];
+                                }
                             }
                         }
                     }

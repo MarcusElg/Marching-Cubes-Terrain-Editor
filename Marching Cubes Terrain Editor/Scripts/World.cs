@@ -35,6 +35,8 @@ public class World : MonoBehaviour
     public float noiseScale = 1;
     public float noiseStretch = 1;
 
+    public bool editMode = true;
+
     public DensityGenerator densityGenerator;
     public enum TerrainMode { Modify, Set, Line, Smooth, Paint, Options };
     public TerrainMode terrainMode = TerrainMode.Set;
